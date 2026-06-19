@@ -15,15 +15,15 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: "https://__OWNER__.github.io",
+  url: "https://DIO0550.github.io",
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: "/__REPO_NAME__/",
+  baseUrl: "/dev-knowledge/",
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: "__OWNER__", // Usually your GitHub org/user name.
-  projectName: "__REPO_NAME__", // Usually your repo name.
+  organizationName: "DIO0550", // Usually your GitHub org/user name.
+  projectName: "dev-knowledge", // Usually your repo name.
 
   onBrokenLinks: "throw",
 
@@ -44,7 +44,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
+            "https://github.com/DIO0550/dev-knowledge/tree/main/dev-knowledge/",
         },
         blog: {
           showReadingTime: true,
@@ -55,7 +55,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
+            "https://github.com/DIO0550/dev-knowledge/tree/main/dev-knowledge/",
           // Useful options to enforce blogging best practices
           onInlineTags: "warn",
           onInlineAuthors: "warn",
@@ -89,7 +89,7 @@ const config: Config = {
         },
         { to: "/blog", label: "Blog", position: "left" },
         {
-          href: "https://github.com/facebook/docusaurus",
+          href: "https://github.com/DIO0550/dev-knowledge",
           label: "GitHub",
           position: "right",
         },
@@ -133,7 +133,7 @@ const config: Config = {
             },
             {
               label: "GitHub",
-              href: "https://github.com/facebook/docusaurus",
+              href: "https://github.com/DIO0550/dev-knowledge",
             },
           ],
         },
