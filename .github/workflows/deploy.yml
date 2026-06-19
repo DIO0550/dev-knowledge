@@ -1,0 +1,73 @@
+# .github/workflows/deploy.yml
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: ["Setup from template"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # テンプレートリポジトリ自体はスキップ、setup完了後 or my-siteがリネーム済みの場合のみ実行
+    if: |
+      github.event.repository.is_template == false &&
+      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Detect site directory
+        id: detect
+        run: |
+          if [ -d "${{ github.event.repository.name }}" ]; then
+            echo "dir=${{ github.event.repository.name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "dir=my-site" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: ${{ steps.detect.outputs.dir }}/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+        working-directory: ${{ steps.detect.outputs.dir }}
+      - run: pnpm build
+        working-directory: ${{ steps.detect.outputs.dir }}
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ steps.detect.outputs.dir }}/build
+
+  deploy:
+    needs: build
+    if: github.event.repository.is_template == false
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment

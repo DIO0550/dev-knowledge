@@ -1,0 +1,57 @@
+# .github/workflows/setup.yml
+name: Setup from template
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  setup:
+    if: github.event.repository.is_template == false
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Replace placeholders
+        run: |
+          REPO_NAME="${{ github.event.repository.name }}"
+          OWNER="${{ github.repository_owner }}"
+          REPO_URL="https://github.com/$OWNER/$REPO_NAME"
+
+          # Rename my-site directory to repository name
+          mv my-site "$REPO_NAME"
+
+          # package.json
+          sed -i "s/\"name\": \"my-site\"/\"name\": \"$REPO_NAME\"/" "$REPO_NAME/package.json"
+
+          # docusaurus.config.ts - replace placeholders
+          sed -i "s|__OWNER__|$OWNER|g" "$REPO_NAME/docusaurus.config.ts"
+          sed -i "s|__REPO_NAME__|$REPO_NAME|g" "$REPO_NAME/docusaurus.config.ts"
+
+          # editUrl (docs & blog)
+          sed -i "s|https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/|$REPO_URL/tree/main/$REPO_NAME/|g" "$REPO_NAME/docusaurus.config.ts"
+
+          # navbar & footer GitHub links
+          sed -i "s|https://github.com/facebook/docusaurus|$REPO_URL|g" "$REPO_NAME/docusaurus.config.ts"
+
+          # Remove .docusaurus cache (auto-generated, contains stale paths)
+          rm -rf "$REPO_NAME/.docusaurus"
+
+      - name: Remove this workflow
+        run: rm .github/workflows/setup.yml
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "chore: initialize project from template"
+          git push
