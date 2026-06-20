@@ -1,0 +1,7 @@
+{
+  "label": "State",
+  "link": {
+    "type": "generated-index",
+    "description": "React の state 管理・カスタムフック設計に関する知見。"
+  }
+}
