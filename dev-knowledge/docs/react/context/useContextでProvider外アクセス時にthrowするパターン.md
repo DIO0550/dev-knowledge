@@ -221,3 +221,9 @@ function createSafeContext<T>(name: string) {
 3. 公式に無いのは「劣るから」ではなく、React のコンテキスト API が必須/任意を区別しない設計のしわ寄せ。
 4. TanStack Query 等が実際に採用している確立されたイディオム。
 5. 本物のデフォルト値があるならデフォルト値方式が正しい。無いなら null/undefined + throw、定型化するならヘルパーに閉じ込める。
+
+---
+
+## 参考
+
+- Kent C. Dodds "How to use React Context effectively" — カスタムコンシューマフックで Provider 外アクセス時に throw する手法を紹介している（本記事はその設計背景・型の扱い・他選択肢との比較まで掘り下げたもの）。Context の使いどころ・`value` の memo 化・state/dispatch 分割など関連トピックは別記事参照。
