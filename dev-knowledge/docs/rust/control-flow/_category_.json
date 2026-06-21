@@ -1,0 +1,7 @@
+{
+  "label": "Control Flow",
+  "link": {
+    "type": "generated-index",
+    "description": "Rust の制御フロー・イディオム（loop / while let など）に関する知見。"
+  }
+}
