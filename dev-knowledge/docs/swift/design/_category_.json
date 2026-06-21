@@ -1,0 +1,7 @@
+{
+  "label": "Design",
+  "link": {
+    "type": "generated-index",
+    "description": "Swift の設計・DDD に関する知見。"
+  }
+}

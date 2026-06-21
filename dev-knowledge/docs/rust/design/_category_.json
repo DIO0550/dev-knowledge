@@ -1,0 +1,7 @@
+{
+  "label": "Design",
+  "link": {
+    "type": "generated-index",
+    "description": "Rust の設計・DDD・型と振る舞いの配置に関する知見。"
+  }
+}
