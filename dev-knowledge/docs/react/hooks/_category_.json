@@ -1,0 +1,7 @@
+{
+  "label": "Hooks",
+  "link": {
+    "type": "generated-index",
+    "description": "React の hooks（useEffect・カスタムフック）設計に関する知見。"
+  }
+}
