@@ -19,6 +19,20 @@ const CategoryList: CategoryItem[] = [
       <>React に関する知見・遭遇した問題と解決策（state, Context など）。</>
     ),
   },
+  {
+    title: "Rust",
+    to: "/docs/category/rust",
+    description: (
+      <>Rust に関する知見・遭遇した問題と解決策（所有権・設計など）。</>
+    ),
+  },
+  {
+    title: "Swift",
+    to: "/docs/category/swift",
+    description: (
+      <>Swift に関する知見・遭遇した問題と解決策（enum・設計など）。</>
+    ),
+  },
 ];
 
 function Category({ title, to, description }: CategoryItem) {
