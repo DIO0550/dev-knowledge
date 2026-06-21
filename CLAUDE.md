@@ -17,6 +17,7 @@
 docs/
   react/
   rust/
+  swift/
   ...（技術が増えたら追加）
 ```
 
