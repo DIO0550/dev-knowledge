@@ -33,6 +33,13 @@ const CategoryList: CategoryItem[] = [
       <>Swift に関する知見・遭遇した問題と解決策（enum・設計など）。</>
     ),
   },
+  {
+    title: "Linux",
+    to: "/docs/category/linux",
+    description: (
+      <>Linux に関する知見・遭遇した問題と解決策（コマンドなど）。</>
+    ),
+  },
 ];
 
 function Category({ title, to, description }: CategoryItem) {
