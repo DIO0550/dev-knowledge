@@ -1,0 +1,7 @@
+{
+  "label": "Testing",
+  "link": {
+    "type": "generated-index",
+    "description": "React のテスト戦略・設計に関する知見。"
+  }
+}
