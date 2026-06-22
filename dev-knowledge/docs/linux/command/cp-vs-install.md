@@ -114,5 +114,3 @@ install:
 - cp invocation (GNU Coreutils): https://www.gnu.org/software/coreutils/manual/html_node/cp-invocation.html
 - install(1) — Linux manual page (man7.org, coreutils 9.11): https://man7.org/linux/man-pages/man1/install.1.html
 - cp(1) — Linux manual page (man7.org): https://man7.org/linux/man-pages/man1/cp.1.html
-</content>
-</invoke>
