@@ -40,6 +40,13 @@ const CategoryList: CategoryItem[] = [
       <>Linux に関する知見・遭遇した問題と解決策（コマンドなど）。</>
     ),
   },
+  {
+    title: "Data Modeling",
+    to: "/docs/category/data-modeling",
+    description: (
+      <>データモデリング・ドメインモデリング・エンティティの同一性に関する知見。</>
+    ),
+  },
 ];
 
 function Category({ title, to, description }: CategoryItem) {
