@@ -1,0 +1,7 @@
+{
+  "label": "Testing",
+  "link": {
+    "type": "generated-index",
+    "description": "Rust のテスト（ユニットテスト・統合テスト・テスト構成）に関する知見。"
+  }
+}
