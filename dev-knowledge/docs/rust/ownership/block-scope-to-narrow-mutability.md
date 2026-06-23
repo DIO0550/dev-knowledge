@@ -1,6 +1,6 @@
 ---
 title: Rust で mutable な変数の影響範囲をブロックスコープで狭めるのは正しいか
-tags: [rust, ownership, mutability, mut, scope, block-expression, drop, nesting, borrow-checker, nll, shadowing, clippy, idiom]
+tags: [rust, ownership, mutability, mut, scope, block-expression, drop, nesting, borrow-checker, nll, shadowing, clippy, builder, pdf_writer, idiom]
 ---
 
 ## TL;DR
@@ -112,6 +112,59 @@ let headers = {
 
 `drop(a); drop(b); drop(c);` と並べるより、**複数の中間変数をまとめてスコープ外に追い出したい**、あるいは**中間変数名を後続コードに漏らしたくない**ときは、ブロックのほうが意図が明確になりうる。Rust by Example も「ブロック `{}` で変数の lifetime を限定できる」用法を正当なものとして例示している。質問のコードがこの性格（複数の作業変数を `b` 周辺で完結させたい）なら、ブロックは妥当な選択。
 
+### 実例: `pdf_writer` の builder（Drop 副作用 + 排他借用）
+
+ブロックが「冗長」どころか**必要**になる典型例が、`pdf_writer` クレート（typst の PDF 生成クレート、v0.15.0）のような builder/writer API。
+
+```rust
+let mut xform = chunk.form_xobject(id, content);
+{
+    let mut res = xform.resources();
+    // ...res にフォントや xobject を登録する処理
+} // ← ここで res が drop され、(a) 辞書が閉じ、(b) xform の借用が解放される
+// この後 xform を使える
+```
+
+この writer 型は次の2つの性質を持つため、ブロック（または `drop`/`finish`）が要る。
+
+1. **`resources()` は `&mut self`（=xform）を借用して `Resources<'_>` を返す。** 返り値 `res` が生きている間、`xform` は可変借用されたままで触れない。
+
+   ```rust
+   // Chunk
+   pub fn form_xobject<'a>(&'a mut self, id: Ref, content: &'a [u8]) -> FormXObject<'a>
+   // FormXObject
+   pub fn resources(&mut self) -> Resources<'_>
+   ```
+
+2. **`res` はただの参照ではなく Drop 副作用を持つ所有値。** Deref 先の `Dict` の `Drop` が、辞書の閉じ括弧 `>>` を出力バッファに書き込む。
+
+   ```rust
+   impl Drop for Dict<'_> {
+       fn drop(&mut self) {
+           // ...
+           self.buf.extend(b">>");   // ← resources 辞書を閉じる副作用
+       }
+   }
+   ```
+
+ここで重要なのは、**この借用は NLL では切れない**こと。NLL が最後の使用で打ち切れるのは「ただの参照」だけで、`res` のように `Drop` 副作用を持つ所有値はスコープ末尾まで生存する（前述「所有値の drop タイミングはレキシカル」のとおり）。だから `res` を早く落とすには明示的なスコープ操作が必須になる。
+
+ブロックで `res` を drop すると **(a) resources 辞書が `>>` で閉じられ（出力の構造が正しくなる）**、**(b) `xform` への可変借用が解放され再び使える**、の2つが同時に起こる。pdf_writer の公式ドキュメントもこのパターンを案内している。
+
+> "When you bind a writer to a variable instead of just writing a chained builder pattern, you may need to manually drop it ... using `finish()` or `drop()`."
+
+フラットに書きたいなら、ブロックの代わりに `res.finish();`（= `drop(res);` と等価）でもよい。
+
+```rust
+let mut xform = chunk.form_xobject(id, content);
+let mut res = xform.resources();
+// ...処理
+res.finish();   // 辞書を閉じ、借用を解放（ブロックと同じ効果）
+// この後 xform を使える
+```
+
+つまり「writer を変数に束縛して使う builder API」では、**借用を返す型 + Drop 副作用**という組み合わせのため、ブロックか `finish()`/`drop()` での明示的な早期 drop が必要になる。NLL があっても消せない、ブロックが正当な場面の代表例。
+
 ## 使い分けの早見表
 
 | 目的 | 第一選択（フラット） | ブロックを使うなら |
@@ -144,6 +197,10 @@ let headers = {
 - RFC 2094 Non-Lexical Lifetimes（借用を切るブロックは「人工的」）: https://rust-lang.github.io/rfcs/2094-nll.html
 - Rust Blog: NLL fully stable（借用は早く終わりうる。NLL は借用のみ）: https://blog.rust-lang.org/2022/08/05/nll-by-default/
 - The Book ch.3-1 Variables and Mutability（デフォルト immutable / `mut` は意図表明）: https://doc.rust-lang.org/book/ch03-01-variables-and-mutability.html
+
+- pdf_writer `Chunk`（`form_xobject` シグネチャ）: https://docs.rs/pdf_writer/latest/pdf_writer/struct.Chunk.html
+- pdf_writer `FormXObject`（`resources` シグネチャ）: https://docs.rs/pdf_writer/latest/pdf_writer/writers/struct.FormXObject.html
+- pdf_writer ソース（`Dict` の `Drop`・`Finish`・手動 drop の注意書き）: https://github.com/typst/pdf-writer/blob/main/src/object.rs
 
 二次情報:
 - The block pattern / initialize-and-freeze: https://notgull.net/block-pattern/
