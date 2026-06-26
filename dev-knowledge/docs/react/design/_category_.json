@@ -1,0 +1,7 @@
+{
+  "label": "Design",
+  "link": {
+    "type": "generated-index",
+    "description": "React の設計パターン・UI パターンに関する知見。"
+  }
+}
