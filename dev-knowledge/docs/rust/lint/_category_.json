@@ -1,0 +1,7 @@
+{
+  "label": "Lint",
+  "link": {
+    "type": "generated-index",
+    "description": "Rust の lint・診断属性（allow / expect / cfg_attr など）に関する知見。"
+  }
+}
