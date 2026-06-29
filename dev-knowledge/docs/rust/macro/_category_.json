@@ -1,0 +1,7 @@
+{
+  "label": "Macro",
+  "link": {
+    "type": "generated-index",
+    "description": "Rust のマクロ（macro_rules! / 宣言マクロ / 手続きマクロなど）に関する知見。"
+  }
+}
