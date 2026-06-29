@@ -1,0 +1,7 @@
+{
+  "label": "Compile Time",
+  "link": {
+    "type": "generated-index",
+    "description": "Rust のコンパイル時評価（const fn / const コンテキスト / CTFE など）に関する知見。"
+  }
+}
