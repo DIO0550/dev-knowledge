@@ -95,8 +95,8 @@ fn delete_task() { /* ... */ }
 
 ## 参考
 
-- The Rust Reference - Diagnostic attributes (Lint check attributes): <https://doc.rust-lang.org/reference/attributes/diagnostics.html#lint-check-attributes>
-- The rustc book - Lint Levels: <https://doc.rust-lang.org/rustc/lints/levels.html>
-- RFC 2383 - Lint Reasons (`expect`): <https://rust-lang.github.io/rfcs/2383-lint-reasons.html>
-- Announcing Rust 1.81.0: <https://blog.rust-lang.org/2024/09/05/Rust-1.81.0.html>
-- Clippy `allow_attributes`: <https://rust-lang.github.io/rust-clippy/master/index.html#allow_attributes>
+- [The Rust Reference - Diagnostic attributes (Lint check attributes)](https://doc.rust-lang.org/reference/attributes/diagnostics.html#lint-check-attributes)
+- [The rustc book - Lint Levels](https://doc.rust-lang.org/rustc/lints/levels.html)
+- [RFC 2383 - Lint Reasons (`expect`)](https://rust-lang.github.io/rfcs/2383-lint-reasons.html)
+- [Announcing Rust 1.81.0](https://blog.rust-lang.org/2024/09/05/Rust-1.81.0.html)
+- [Clippy `allow_attributes`](https://rust-lang.github.io/rust-clippy/master/index.html#allow_attributes)
