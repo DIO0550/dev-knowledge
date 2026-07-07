@@ -1,0 +1,7 @@
+{
+  "label": "Testing",
+  "link": {
+    "type": "generated-index",
+    "description": "Java / Spring Boot のテスト（ユニットテスト・スライステスト・統合テスト）に関する知見。"
+  }
+}
