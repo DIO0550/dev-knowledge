@@ -234,9 +234,9 @@ Rust では **「struct を受け取る自由関数」への分割は、UFCS・a
 
 ## 参考
 
-- The Rust Programming Language, ch05-03 Method Syntax — <https://doc.rust-lang.org/book/ch05-03-method-syntax.html>
-- Rust Reference, `impl` keyword — <https://doc.rust-lang.org/std/keyword.impl.html>
-- Rust API Guidelines, Naming (C-CONV, C-GETTER) — <https://rust-lang.github.io/api-guidelines/naming.html>
-- users.rust-lang.org: When to use functions and when to define structs and use methods on them? — <https://users.rust-lang.org/t/when-to-use-functions-and-when-to-define-structs-and-use-methods-on-them/84952>
-- users.rust-lang.org: Discussion on the several way to split large code — <https://users.rust-lang.org/t/discussion-on-the-several-way-to-split-large-code/102853>
+- The Rust Programming Language, ch05-03 Method Syntax — [https://doc.rust-lang.org/book/ch05-03-method-syntax.html](https://doc.rust-lang.org/book/ch05-03-method-syntax.html)
+- Rust Reference, `impl` keyword — [https://doc.rust-lang.org/std/keyword.impl.html](https://doc.rust-lang.org/std/keyword.impl.html)
+- Rust API Guidelines, Naming (C-CONV, C-GETTER) — [https://rust-lang.github.io/api-guidelines/naming.html](https://rust-lang.github.io/api-guidelines/naming.html)
+- users.rust-lang.org: When to use functions and when to define structs and use methods on them? — [https://users.rust-lang.org/t/when-to-use-functions-and-when-to-define-structs-and-use-methods-on-them/84952](https://users.rust-lang.org/t/when-to-use-functions-and-when-to-define-structs-and-use-methods-on-them/84952)
+- users.rust-lang.org: Discussion on the several way to split large code — [https://users.rust-lang.org/t/discussion-on-the-several-way-to-split-large-code/102853](https://users.rust-lang.org/t/discussion-on-the-several-way-to-split-large-code/102853)
 - users.rust-lang.org: Code structure for big `impl`s distributed over several files
