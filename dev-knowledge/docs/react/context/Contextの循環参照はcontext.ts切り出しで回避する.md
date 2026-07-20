@@ -65,7 +65,7 @@ import { ToastContainer } from "./ToastContainer";
 import { useToasts } from "./context";
 ```
 
-import の向きが `Provider → context ← Container` の **一方向（共通の下位モジュールへ集約）** になり、Provider ⇄ Container の相互依存が消える。
+この構造では import の向きが `Provider → context ← Container` の **一方向（共通の下位モジュールへ集約）** になり、Provider ⇄ Container の相互依存が消える。
 
 ## 4. 判断のポイント
 
