@@ -9,7 +9,7 @@ tags: [react, useSyncExternalStore, state-management, external-store, async, use
 - 回避策として `latestStateRef.current` に手動ミラーし `dispatchSync` で二重更新するやり方は、真実が 2 箇所に分裂し、規律でしか整合が保てない。
 - state の本体を React の外の素の TS オブジェクト（store）として持ち、`useSyncExternalStore` で購読するだけにすると、ref ミラー・`dispatchSync`・二重 reducer がすべて不要になる。
 
-## 問題
+## 遭遇した問題
 
 async command（Tauri `invoke` の `await` 後）や Tauri の `listen` callback が「今の state」を同期的に読みたい。React の `useReducer` の state は closure に閉じるので、`await` を跨ぐと古い値を掴んでしまう。
 
@@ -64,7 +64,8 @@ const state = useSyncExternalStore(store.subscribe, store.getState);
 - 真実は store の `state` 1 箇所だけ。ref ミラー・`dispatchSync`・二重 reducer がすべて消える。
 - `useSyncExternalStore` は React 18 標準 API で、外部ストアと React の再レンダーを tearing なく橋渡しする用途そのもの。
 
-## ポイント
+## まとめ
 
 - 「`await` を跨いで最新 state を読みたい」は React state の closure 特性と本質的に相性が悪い。ref ミラーで対症療法するより、state の在り処を React の外に出すのが構造的な解。
+- state の本体を素の store に置き `useSyncExternalStore` で購読すれば、真実が 1 箇所に集約され、ref ミラー・`dispatchSync`・二重 reducer がまとめて消える。
 - reducer ロジックはそのまま流用できる（store の `dispatch` 内で呼ぶだけ）。React への依存だけが外れる。
