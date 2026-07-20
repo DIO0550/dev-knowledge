@@ -1,0 +1,7 @@
+{
+  "label": "Style",
+  "link": {
+    "type": "generated-index",
+    "description": "Rust のコーディングスタイル・書き方の統一に関する知見。"
+  }
+}
