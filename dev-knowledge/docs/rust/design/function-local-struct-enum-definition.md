@@ -133,11 +133,15 @@ rust-analyzer 側の裏付けは `SymbolCollector::collect_from_body` が body �
 
 ## 解決
 
-### std / rustc / tokio での実例
+### 使うタイミング: 5 つの定番パターン
 
-「関数内定義はむしろ適切」なケースは実在する。定番パターンは 5 つ。
+std / rustc / tokio での実例を「なぜ関数内でなければならないか」の軸で整理する。共通するのは **その型が「関数の実装詳細そのもの」であり、外に出すと嘘になる** という構造。
 
-**(a) trait 実装のためのアダプタ / シム** — `core::io::Write::default_write_fmt`:
+#### (a) trait を別の trait に橋渡しするアダプタ / シム
+
+**使うタイミング**: ある trait を要求する API に、別の trait を実装した値を渡したい。変換用の型はその 1 箇所でしか意味を持たない。
+
+`core::io::Write::default_write_fmt` は `io::Write` を `fmt::Write` に見せかけつつ、`fmt::Write` が捨ててしまう I/O エラーを拾う。
 
 ```rust
 fn default_write_fmt<W: Write + ?Sized>(this: &mut W, args: fmt::Arguments<'_>) -> Result<()> {
@@ -151,7 +155,11 @@ fn default_write_fmt<W: Write + ?Sized>(this: &mut W, args: fmt::Arguments<'_>) 
 }
 ```
 
-**(b) `-> impl Display` を返すためのヘルパ型** — rustc 本体で最も多いパターン:
+**外に出すと困ること**: `Adapter` はモジュールの語彙ではない。トップレベルに置くと「このモジュールが提供する概念」に見えてしまい、`pub(crate)` にすれば他所から誤用されうる。エラーを保持する `error` フィールドは「`fmt::write` を呼んだ直後に取り出す」という手順とセットでしか正しく使えず、その手順は関数の中にしかない。
+
+#### (b) `-> impl Display` / `-> impl Debug` を返すためのヘルパ型
+
+**使うタイミング**: 整形処理を遅延させたい（`format!` で先に `String` を作りたくない）。rustc 本体で最も多いパターン。
 
 ```rust
 fn display(&self, idx: usize) -> impl '_ + fmt::Display {
@@ -161,34 +169,130 @@ fn display(&self, idx: usize) -> impl '_ + fmt::Display {
 }
 ```
 
-**(c) RAII / Drop ガード** — `std::sys::process::unix` の `PosixSpawnFileActions` / `Reset`、tokio の `scoped.rs` の `struct Reset<'a, T>`。その関数のスコープでしか意味を持たない後始末。
+**外に出すと困ること**: 戻り値は `impl Display` なので**呼び出し側は型名を知る必要がない**。名前が要らない型に名前空間を消費させる理由がない。`D` という 1 文字名がトップレベルで許されるのも、スコープが閉じているからこそ。
 
-**(d) 使い捨ての Visitor / Iterator** — rustc の `struct MyVisitor(Vec<Span>)`、tokio の `struct BatchTaskIter<'a, T>`。
+このパターンは「(a) の需要が API 境界に現れた形」でもある。std の `sys::backtrace` の `DisplayBacktrace` は、ロックを保持したまま整形を遅延させるため `unsafe { _print_fmt(...) }` を呼ぶ必要があり、**そもそも関数の外に出せない**。
 
-**(e) テスト関数内のダミー型** — std の Windows プロセステストにある `struct DropGuard(Child)`（テスト失敗時に確実に kill する）。
+#### (c) RAII / Drop ガード
 
-serde 公式ドキュメントの手動 `Deserialize` 実装も、`enum Field` と `struct DurationVisitor` を両方 `deserialize` 関数の中に定義している。型と impl が同じネストレベルにあるので `non_local_definitions` にも引っかからない。
+**使うタイミング**: この関数を抜けるときだけ実行したい後始末がある。early return や panic の経路が複数あって、手で書くと漏れる。
 
-### 判断基準
+```rust
+fn with_scoped_value<T, R>(cell: &Cell<*const T>, value: &T, f: impl FnOnce() -> R) -> R {
+    // 関数を抜けるとき（panic 含む）に必ず元へ戻す
+    struct Reset<'a, T> { cell: &'a Cell<*const T>, prev: *const T }
+    impl<T> Drop for Reset<'_, T> {
+        fn drop(&mut self) { self.cell.set(self.prev); }
+    }
 
-関数内に閉じてよい条件（すべて満たすとき）:
+    let _reset = Reset { cell, prev: cell.get() };
+    cell.set(value);
+    f()
+}
+```
 
-- 外側の関数のジェネリクス・ローカル変数に依存しない
-- その関数の外で使わない（引数型・戻り値型として外に露出しない）
-- 単体でテストする必要がない
-- doc comment を公開ドキュメントに出す必要がない
+実例は `std::sys::process::unix` の `PosixSpawnFileActions` / `Reset`、tokio の `runtime/context/scoped.rs` の `Reset`、tokio の `harness.rs`（`catch_unwind` に渡すクロージャの**さらに内側**に `Guard` を定義している）。
 
-モジュールレベルへ出すべきサイン（どれか 1 つでも該当したら）:
+**外に出すと困ること**: ガードが復元する「前の値」はこの関数のローカル状態。トップレベルに出すと、その不変条件を型のドキュメントで説明し直す羽目になる。ガードは `let _guard = ...` と書いた行の直後に定義が見えるのが最も読みやすい。
 
-- 外側の関数がジェネリック（E0401 で詰む）
-- 別の関数からも使いたくなった
-- 公開 API に露出させたい / rustdoc に載せたい
-- その型自体の不変条件をテストで固定したい
-- **既存コードがモジュールレベルに型を並べる流儀で統一されている**
+#### (d) 使い捨ての Visitor / Iterator
 
-冒頭の `Frame` は「外側の関数の外では使わない・テスト不要・ジェネリクス非依存」なので、仕様上は関数内に閉じても問題ない。それでもモジュールレベルへ出す判断が妥当だったのは、**最後の「既存コードの流儀に揃える」が効いたから**であり、「関数内定義が Rust の慣習に反するから」ではない。ここは区別して覚えておく。
+**使うタイミング**: trait を実装しないと呼べない API（`Visitor`、`Iterator`、serde の `Deserialize`）に対して、この 1 回の走査のためだけに状態を持たせたい。
 
-なお Reference が「モジュール内に宣言したのと意味的に同一」と言っている通り、**後から外に出すリファクタは容易**。迷ったら関数内に閉じておいて、必要になった時点で出す運用でも破綻しない。
+```rust
+fn collect_spans(node: &Node) -> Vec<Span> {
+    struct MyVisitor(Vec<Span>);
+    impl<'v> Visitor<'v> for MyVisitor { /* 訪問中に self.0 へ push */ }
+
+    let mut v = MyVisitor(Vec::new());
+    v.visit(node);
+    v.0
+}
+```
+
+serde 公式ドキュメントの手動 `Deserialize` 実装も、`enum Field` と `struct DurationVisitor`、およびそれぞれの impl を**すべて `deserialize` 関数の中**に定義している。型と impl が同じネストレベルにあるので `non_local_definitions` にも引っかからない。
+
+**外に出すと困ること**: Visitor はクロージャの代用品であり、「クロージャで書けるならクロージャで書く」ものが trait 制約でやむなく型になっただけ。クロージャをモジュールレベルに置かないのと同じ理由で、外に出す動機がない。
+
+#### (e) テスト関数内のダミー型 / ガード
+
+**使うタイミング**: そのテストケース専用のスタブ、フィクスチャ、後始末。
+
+```rust
+#[test]
+fn child_is_killed_on_failure() {
+    struct DropGuard(Child);
+    impl Drop for DropGuard {
+        fn drop(&mut self) { let _ = self.0.kill(); }
+    }
+
+    let _guard = DropGuard(spawn_child());
+    // assert が落ちても子プロセスは確実に kill される
+}
+```
+
+**外に出すと困ること**: テストモジュールの先頭に並べると、どのテストが使うものか分からなくなる。テストが増えるほど「使われていないヘルパ型」が溜まる。
+
+### 判断フロー
+
+上から順に見て、最初に該当したところで決める。
+
+1. **外側の関数がジェネリックで、その型引数を使いたいか** → Yes ならモジュールレベル（E0401 で詰む。内側で宣言し直せば回避できるが、二重管理になるなら出したほうがよい）
+2. **外側で定義された型 / trait に `impl` を書こうとしているか** → Yes ならモジュールレベル（`non_local_definitions` で warn。将来 deny 化の可能性あり）
+3. **その型が関数の引数型 / 戻り値型として名前で露出するか** → Yes ならモジュールレベル（`-> impl Trait` なら露出しないので該当しない）
+4. **その型自体を単体テストしたいか** → Yes ならモジュールレベル（canonical path が無いのでテストから参照できない）
+5. **rustdoc に載せたいか** → Yes ならモジュールレベル（`--document-private-items` でも出ない）
+6. **同じ定義が 2 箇所目に現れたか / 現れそうか** → Yes ならモジュールレベル
+7. **既存コードがモジュールレベルに型を並べる流儀で統一されているか** → Yes なら揃える
+8. ここまで全部 No → **関数内に閉じてよい**
+
+### 使わないタイミング（避けるべきケース）
+
+```rust
+// 動かない例: 外側のジェネリクスを使おうとする
+fn process<T: Clone>(items: Vec<T>) {
+    struct Frame {
+        item: T, // error[E0401]: can't use generic parameters from outer item
+    }
+}
+
+// 動く例: 内側で宣言し直す（ただし二重管理になるなら外に出す）
+fn process<T: Clone>(items: Vec<T>) {
+    struct Frame<T> {
+        item: T,
+    }
+}
+```
+
+```rust
+// 警告される例: 外側で定義された型への impl を関数内に隠す
+struct Outer;
+trait MyTrait { fn f(&self); }
+
+fn setup() {
+    impl MyTrait for Outer { // warning: non-local `impl` definition
+        fn f(&self) {}
+    }
+}
+
+// 動く例: 型と impl をセットで関数内に閉じる（警告なし）
+fn setup() {
+    struct Local;
+    impl MyTrait for Local {
+        fn f(&self) {}
+    }
+}
+```
+
+孤児ルール回避のために関数内へ `impl` を隠すのは、この lint がまさに狙っている用法。**関数内定義を「回避策」として使い始めたら赤信号**と考えてよい。
+
+### 冒頭の `Frame` はどちらか
+
+`Frame` は「反復 DFS の途中状態」なので、上の判断フローでは 1〜6 がすべて No。**仕様上は関数内に閉じて問題ない**し、パターンとしては (c)(d) に近い「アルゴリズムの実装詳細」に当たる。
+
+それでもモジュールレベルへ出す判断が妥当だったのは、**7 の「既存コードの流儀に揃える」が効いたから**であり、「関数内定義が Rust の慣習に反するから」ではない。ここは区別して覚えておく。
+
+なお Reference が「モジュール内に宣言したのと意味的に同一」と言っている通り、**後から外に出すリファクタは容易**（`impl` ごと切り出して貼るだけ）。迷ったら関数内に閉じておいて、判断フローの 3〜6 に引っかかった時点で出す、という運用でも破綻しない。逆方向（外から中へ）も同じくらい安い。
 
 ### 他言語での同じ議論
 
