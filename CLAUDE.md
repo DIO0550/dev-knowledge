@@ -26,14 +26,19 @@ docs/
 
 ## 公開サイトからの探索（AI 向け JSON）
 
-公開サイトには、タグから記事を辿るための JSON をビルド時に出力している。既存ナレッジを調べるときはこれを使う。
+公開サイトには、記事を引くための JSON をビルド時に出力している。既存ナレッジを調べるときは検索せずこれを使う。ベースは `https://DIO0550.github.io/dev-knowledge`。
 
-- `https://DIO0550.github.io/dev-knowledge/api/tags.json` — 全タグ（`name` / `count` / 詳細 JSON の `url`）
-- `tags.json` の `url` を辿ると、そのタグが付いた記事の `title` と `url` が返る
+- `/api/docs.json` — 全記事の目次。`title` / `url` / `category` / `tags` と、本文を返す `contentUrl`。全体で 60KB 程度なので丸ごと読んでよい
+- `/api/docs/<id>.json` — 記事の本文（frontmatter を除いた Markdown）。HTML をパースする必要はない
+- `/api/tags.json` — 全タグ（`name` / `count` / タグ別 JSON の `url`）
+- `/api/tags/<tag>.json` — そのタグが付いた記事の一覧（`docs.json` と同じ形）
+- `/api/index.json` — 上記エンドポイントの URL をまとめたエントリポイント
 
-タグ名から URL を組み立てないこと。タグ名と slug は一致しないことがあり、日本語タグは percent-encode される。
+基本の流れは「`docs.json` を読む → 関係しそうな記事の `contentUrl` を取る」。タグから絞りたいときだけ `tags.json` を使う。
 
-生成元は `dev-knowledge/plugins/tag-json-api.ts`。記事の frontmatter の `tags` をそのまま使うので、記事を追加すれば自動で反映される。
+URL は文字列として組み立てず、レスポンスに入っている URL をそのまま辿ること。タグ名と slug は一致しないことがあり、日本語は percent-encode される。
+
+生成元は `dev-knowledge/plugins/json-api.ts`。記事の frontmatter をそのまま使うので、記事を追加すれば自動で反映される。
 
 ## 記事を書くときのルール
 
