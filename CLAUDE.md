@@ -24,6 +24,17 @@ docs/
 - カテゴリ（フォルダ）は粗く保つ。細分化は記事が溜まってからでよい。
 - 1 記事 = 1 つの問題 or 知見。粒度は小さく。
 
+## 公開サイトからの探索（AI 向け JSON）
+
+公開サイトには、タグから記事を辿るための JSON をビルド時に出力している。既存ナレッジを調べるときはこれを使う。
+
+- `https://DIO0550.github.io/dev-knowledge/api/tags.json` — 全タグ（`name` / `count` / 詳細 JSON の `url`）
+- `tags.json` の `url` を辿ると、そのタグが付いた記事の `title` と `url` が返る
+
+タグ名から URL を組み立てないこと。タグ名と slug は一致しないことがあり、日本語タグは percent-encode される。
+
+生成元は `dev-knowledge/plugins/tag-json-api.ts`。記事の frontmatter の `tags` をそのまま使うので、記事を追加すれば自動で反映される。
+
 ## 記事を書くときのルール
 
 各 `.md` の frontmatter に以下を付ける。

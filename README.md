@@ -20,6 +20,51 @@
 
 詳細なルールは [CLAUDE.md](./CLAUDE.md) を参照。
 
+## AI 向け JSON エンドポイント
+
+AI がタグ横断でナレッジを探索できるように、ビルド時に静的な JSON を生成しています。
+
+### 全タグ一覧
+
+`GET https://DIO0550.github.io/dev-knowledge/api/tags.json`
+
+```json
+{
+  "count": 337,
+  "tags": [
+    {
+      "name": "react",
+      "count": 40,
+      "url": "https://dio0550.github.io/dev-knowledge/api/tags/react.json"
+    }
+  ]
+}
+```
+
+### タグごとの記事一覧
+
+`GET https://DIO0550.github.io/dev-knowledge/api/tags/<tag>.json`
+
+タグ名から URL を組み立てず、`tags.json` の `url` をそのまま辿ってください（タグ名と slug は必ずしも一致せず、日本語タグは percent-encode されます）。
+
+```json
+{
+  "tag": "react",
+  "count": 40,
+  "docs": [
+    {
+      "title": "useState と useReducer の使い分け",
+      "url": "https://dio0550.github.io/dev-knowledge/docs/react/hooks/useState%E3%81%A8useReducer%E3%81%AE%E4%BD%BF%E3%81%84%E5%88%86%E3%81%91",
+      "tags": ["react", "useState", "useReducer"]
+    }
+  ]
+}
+```
+
+生成しているのは [`dev-knowledge/plugins/tag-json-api.ts`](./dev-knowledge/plugins/tag-json-api.ts)（Docusaurus のローカルプラグイン）です。記事の frontmatter の `tags` をそのまま使うので、記事を追加すれば次のデプロイで自動的に反映されます。
+
+出力はビルド時のみです。ローカルで確認するときは `pnpm start` ではなく `pnpm build && pnpm serve` を使ってください。
+
 ## ディレクトリ構成
 
 ```
@@ -35,6 +80,8 @@
     │   ├── swift/
     │   ├── linux/
     │   └── data-modeling/
+    ├── plugins/
+    │   └── tag-json-api.ts # AI 向け JSON エンドポイントの生成
     ├── src/
     ├── static/
     └── docusaurus.config.ts

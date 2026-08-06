@@ -54,6 +54,9 @@ const config: Config = {
     ],
   ],
 
+  // AI 向けのタグ探索用 JSON（/api/tags.json, /api/tags/<tag>.json）をビルド時に出力する
+  plugins: ["./plugins/tag-json-api.ts"],
+
   themeConfig: {
     // Replace with your project's social card
     image: "img/docusaurus-social-card.jpg",
