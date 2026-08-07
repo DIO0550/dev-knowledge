@@ -54,6 +54,9 @@ const config: Config = {
     ],
   ],
 
+  // AI 向けの探索用 JSON（/api/ 配下）をビルド時に出力する
+  plugins: ["./plugins/json-api.ts"],
+
   themeConfig: {
     // Replace with your project's social card
     image: "img/docusaurus-social-card.jpg",
