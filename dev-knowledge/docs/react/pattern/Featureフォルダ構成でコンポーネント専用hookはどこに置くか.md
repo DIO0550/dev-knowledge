@@ -1,15 +1,6 @@
 ---
 title: Featureフォルダ構成でコンポーネント専用hookはどこに置くか
-tags:
-  [
-    react,
-    hooks,
-    folder-structure,
-    colocation,
-    feature-based-architecture,
-    bulletproof-react,
-    feature-sliced-design,
-  ]
+tags: [react, hooks, folder-structure, colocation, feature-based-architecture, bulletproof-react, feature-sliced-design]
 ---
 
 ## TL;DR
