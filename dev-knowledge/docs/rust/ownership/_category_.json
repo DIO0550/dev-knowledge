@@ -1,0 +1,7 @@
+{
+  "label": "Ownership",
+  "link": {
+    "type": "generated-index",
+    "description": "Rust の所有権・借用・ライフタイム・参照カウント（Rc/Arc）に関する知見。"
+  }
+}
