@@ -1,12 +1,12 @@
 ---
 title: useEffectEvent の使い分けは「呼び出し側 Effect の同期意図」で決まる
-tags: [react, react-19.2, useEffectEvent, useEffect, hooks, reactivity, anti-pattern, dependency-array]
+tags: [react, react-19.2, use-effect-event, use-effect, hooks, reactivity, anti-pattern, dependency-array]
 ---
 
 ## TL;DR
 
 - `useEffectEvent` で wrap して良いかは、**wrap される関数の中身（props 関数か値読み取りか、ロジックの有無）では決まらない**
-- 判定基準は呼び出し側 Effect の同期意図ただ一点: 「wrap した関数が読む値の変化で Effect が再走るべきか」
+- 判定基準は呼び出し側 Effect の同期意図ただ一点: 「wrap した関数が読む値の変化で Effect が再実行されるべきか」
   - **Yes** → deps に入れる（wrap しない）
   - **No** → wrap が正当（最新値だけ読みたい）
 - 公式の例（`canMove` / `muted` / `theme` / `count`）はすべて**値を読む関数を wrap している**。「値を読まない純粋ロジックだけが対象」という読み方は誤り
@@ -80,7 +80,7 @@ function Canvas() {
 Effect の役割が「`page` が変わったら再フェッチ」なら、`page` を非リアクティブにすると Effect の役割と矛盾する。
 
 ```ts
-// 🔴 NG: deps を short にする目的だけで wrap
+// 🔴 NG: 依存配列を短くする目的だけでラップする
 function ItemList({ page }: { page: number }) {
   const [items, setItems] = useState([]);
 
@@ -110,7 +110,7 @@ function ItemList({ page }: { page: number }) {
 ### 判定ステップ
 
 1. wrap したい関数を、それを **呼び出している Effect** とセットで眺める
-2. その関数内で読む値が変わったとき、Effect は再走るべきか？
+2. その関数内で読む値が変わったとき、Effect は再実行されるべきか？
    - **Yes** → deps に入れる。`useEffectEvent` で wrap しない
    - **No** → wrap が正当（最新値だけ読みたい）
 3. wrap 単独では判定不能。`const fnA = useEffectEvent(() => console.log(a))` の例も、`fnA` を呼ぶ Effect の役割次第で OK/NG が反転する

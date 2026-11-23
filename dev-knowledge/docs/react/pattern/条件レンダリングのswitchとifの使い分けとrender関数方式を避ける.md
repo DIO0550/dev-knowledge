@@ -105,8 +105,8 @@ function UserList({ users, error, isLoading }: Props) {
 
 ## 参考
 
-- React 公式: Rules of React — React calls Components and Hooks（https://react.dev/reference/rules/react-calls-components-and-hooks）
-- Robin Wieruch: React Conditional Rendering（https://www.robinwieruch.de/conditional-rendering-react/）
-- Render Functions & React Components — React Compiler で壊れる例（https://fausto95.substack.com/p/render-functions-and-react-components）
-- Component() 直接呼び出しと useState の実害（https://dev.to/carlosrafael22/one-practical-difference-between-component-syntax-and-component-in-react-with-usestate-3pjd）
-- switch と if の使い分け（https://sebhastian.com/react-switch/）
+- [React 公式: Rules of React — React calls Components and Hooks](https://react.dev/reference/rules/react-calls-components-and-hooks)
+- [Robin Wieruch: React Conditional Rendering](https://www.robinwieruch.de/conditional-rendering-react/)
+- [Render Functions & React Components — React Compiler で壊れる例](https://fausto95.substack.com/p/render-functions-and-react-components)
+- [Component() 直接呼び出しと useState の実害](https://dev.to/carlosrafael22/one-practical-difference-between-component-syntax-and-component-in-react-with-usestate-3pjd)
+- [switch と if の使い分け](https://sebhastian.com/react-switch/)

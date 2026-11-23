@@ -59,11 +59,11 @@ type OrderState =
 
 ## 参考
 
-- Johnson et al., "An Empirical Study Assessing Source Code Readability in Comprehension" (ICSME 2019) — https://ieeexplore.ieee.org/document/8918951/
-- Muñoz Barón, Wyrich, Wagner, "An Empirical Validation of Cognitive Complexity as a Measure of Source Code Understandability" (ESEM 2020) — https://arxiv.org/abs/2007.12520
-- "On the comprehensibility of functional decomposition: An empirical study" (ICPC 2024) — https://dl.acm.org/doi/10.1145/3643916.3644432
-- Lavazza et al., "An empirical evaluation of the 'Cognitive Complexity' measure as a predictor of code understandability" (JSS 2022) — https://www.sciencedirect.com/science/article/abs/pii/S0164121222002370
-- "How do Developers Improve Code Readability? An Empirical Study of Pull Requests" — https://arxiv.org/pdf/2309.02594
-- 技術評論社「可読性向上の必勝パターンは存在するのか」 — https://gihyo.jp/book/pickup/2022/0063
-- Ninton「リーダブルコードをさらに改良する（アンチ・アーリーリターン）」 — https://www.ninton.co.jp/archives/8065
-- TransRecog「早期returnは善か悪か ー 海外の反応は？」 — https://www.transrecog.com/diary/2025/09/02/post-3284/
+- [Johnson et al., "An Empirical Study Assessing Source Code Readability in Comprehension" (ICSME 2019)](https://ieeexplore.ieee.org/document/8918951/)
+- [Muñoz Barón, Wyrich, Wagner, "An Empirical Validation of Cognitive Complexity as a Measure of Source Code Understandability" (ESEM 2020)](https://arxiv.org/abs/2007.12520)
+- ["On the comprehensibility of functional decomposition: An empirical study" (ICPC 2024)](https://dl.acm.org/doi/10.1145/3643916.3644432)
+- [Lavazza et al., "An empirical evaluation of the 'Cognitive Complexity' measure as a predictor of code understandability" (JSS 2022)](https://www.sciencedirect.com/science/article/abs/pii/S0164121222002370)
+- ["How do Developers Improve Code Readability? An Empirical Study of Pull Requests"](https://arxiv.org/pdf/2309.02594)
+- [技術評論社「可読性向上の必勝パターンは存在するのか」](https://gihyo.jp/book/pickup/2022/0063)
+- [Ninton「リーダブルコードをさらに改良する（アンチ・アーリーリターン）」](https://www.ninton.co.jp/archives/8065)
+- [TransRecog「早期returnは善か悪か ー 海外の反応は？」](https://www.transrecog.com/diary/2025/09/02/post-3284/)

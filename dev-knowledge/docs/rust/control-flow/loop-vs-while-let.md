@@ -1,6 +1,6 @@
 ---
 title: Rust の loop と while let の使い分け
-tags: [rust, control-flow, loop, while-let, clippy, while_let_loop, idiom, pattern-matching]
+tags: [rust, control-flow, loop, while-let, clippy, while-let-loop, idiom, pattern-matching]
 ---
 
 ## TL;DR
@@ -118,8 +118,8 @@ loop {
 
 ## 参考
 
-- The Rust Reference – Loop expressions（`while let` の desugar、`loop` のみ break value 可）: https://doc.rust-lang.org/reference/expressions/loop-expr.html
-- std `while` キーワード（`while` は常に `()` 評価）: https://doc.rust-lang.org/std/keyword.while.html
-- Clippy lint `while_let_loop`（style グループ）: https://rust-lang.github.io/rust-clippy/master/index.html
-- rust-clippy issue #1693 / #16393（書き換え不可な false positive 境界）: https://github.com/rust-lang/rust-clippy/issues/1693
-- Effective Rust – Item 29: Listen to Clippy: https://effective-rust.com/clippy.html
+- [The Rust Reference – Loop expressions（`while let` の desugar、`loop` のみ break value 可）](https://doc.rust-lang.org/reference/expressions/loop-expr.html)
+- [std `while` キーワード（`while` は常に `()` 評価）](https://doc.rust-lang.org/std/keyword.while.html)
+- [Clippy lint `while_let_loop`（style グループ）](https://rust-lang.github.io/rust-clippy/master/index.html)
+- [rust-clippy issue #1693 / #16393（書き換え不可な false positive 境界）](https://github.com/rust-lang/rust-clippy/issues/1693)
+- [Effective Rust – Item 29: Listen to Clippy](https://effective-rust.com/clippy.html)

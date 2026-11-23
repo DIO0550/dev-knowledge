@@ -1,6 +1,6 @@
 ---
 title: Context を使う前に検討すること（コンポジション優先）
-tags: [react, context, useContext, composition, state, design, performance]
+tags: [react, context, use-context, composition, state, design, performance]
 ---
 
 ## TL;DR

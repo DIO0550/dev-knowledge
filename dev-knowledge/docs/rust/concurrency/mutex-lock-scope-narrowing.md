@@ -1,6 +1,6 @@
 ---
 title: Rust で Mutex のロック範囲を狭めるためのブロックスコープは正しいか
-tags: [rust, concurrency, mutex, mutexguard, raii, drop, deadlock, async, await, tokio, clippy, significant_drop_tightening, edition-2024]
+tags: [rust, concurrency, mutex, mutex-guard, raii, drop, deadlock, async, await, tokio, clippy, significant-drop-tightening, edition-2024]
 ---
 
 ## TL;DR
@@ -38,7 +38,7 @@ The Book も同様に、「ロック解放はスコープ末尾で自動的に�
 > "the type also has a `Drop` implementation that releases the lock automatically when a `MutexGuard` goes out of scope ... we don't risk forgetting to release the lock."
 > — The Book ch.16-03
 
-したがって**「ロック範囲を狭める」＝「ガードを早く drop させる」**であり、ブロックはそのための最も素直な手段の一つ、という位置づけになる。
+したがって「**ロック範囲を狭める**」＝「**ガードを早く drop させる**」であり、ブロックはそのための最も素直な手段の一つ、という位置づけになる。
 
 ## ブロックスコープは公式が示す慣用パターン
 
@@ -119,7 +119,7 @@ let snapshot = m.lock().unwrap().clone();
 *counter.lock().unwrap() += 1;
 ```
 
-指針: **単一値の読み書きなら (d) が最短で最良。複数ステップなら (a)。フラットさを保ちたい／async なら (b)。意味的にまとまり命名したいなら (c)（ただしガードを返さない）。** std はブロックと明示 drop の両方を「正しいやり方」として併記しており、どちらか一方だけが正解という立場は取っていない。
+指針: **単一値の読み書きなら (d) が最短で最良。複数ステップや async で `.await` をまたぐなら (a)。同期コードでフラットさを保ちたいなら (b)。意味的にまとまり命名したいなら (c)（ただしガードを返さない）。** std はブロックと明示 drop の両方を「正しいやり方」として併記しており、どちらか一方だけが正解という立場は取っていない。
 
 ## 落とし穴: `match` / `if let` の scrutinee で `lock()` する
 
@@ -167,13 +167,13 @@ let result = match unfenced.as_str() {
 
 ## 参考
 
-- std::sync::Mutex（RAII / ブロックで寿命限定 / 明示 drop / 一時値）: https://doc.rust-lang.org/std/sync/struct.Mutex.html
-- std::sync::MutexGuard（`Drop` でロック解放）: https://doc.rust-lang.org/std/sync/struct.MutexGuard.html
-- The Book ch.16-03 Shared-State Concurrency: https://doc.rust-lang.org/book/ch16-03-shared-state.html
-- tokio tutorial: Shared state（`!Send` ガード / await をまたがない / `drop()` ではなくブロック）: https://tokio.rs/tokio/tutorial/shared-state
-- Rust 2024: `if let` temporary scope: https://doc.rust-lang.org/edition-guide/rust-2024/temporary-if-let-scope.html
-- RFC 3606（tail expression temporary lifetimes）: https://rust-lang.github.io/rfcs/3606-temporary-lifetimes-in-tail-expressions.html
-- Clippy lint 一覧: https://rust-lang.github.io/rust-clippy/master/index.html
-- clippy `significant_drop_tightening` 実装: https://github.com/rust-lang/rust-clippy/blob/master/clippy_lints/src/significant_drop_tightening.rs
-- 既知問題: https://github.com/rust-lang/rust-clippy/issues/12121 , https://github.com/rust-lang/rust-clippy/issues/13429
-- 解説（コミュニティ）: https://fasterthanli.me/articles/a-rust-match-made-in-hell , https://dev.to/nsengupta/rust-notes-on-temporary-values-scope-of-mutexguard-and-match-expressions-3-4c85
+- [std::sync::Mutex（RAII / ブロックで寿命限定 / 明示 drop / 一時値）](https://doc.rust-lang.org/std/sync/struct.Mutex.html)
+- [std::sync::MutexGuard（`Drop` でロック解放）](https://doc.rust-lang.org/std/sync/struct.MutexGuard.html)
+- [The Book ch.16-03 Shared-State Concurrency](https://doc.rust-lang.org/book/ch16-03-shared-state.html)
+- [tokio tutorial: Shared state（`!Send` ガード / await をまたがない / `drop()` ではなくブロック）](https://tokio.rs/tokio/tutorial/shared-state)
+- [Rust 2024: `if let` temporary scope](https://doc.rust-lang.org/edition-guide/rust-2024/temporary-if-let-scope.html)
+- [RFC 3606（tail expression temporary lifetimes）](https://rust-lang.github.io/rfcs/3606-temporary-lifetimes-in-tail-expressions.html)
+- [Clippy lint 一覧](https://rust-lang.github.io/rust-clippy/master/index.html)
+- [clippy `significant_drop_tightening` 実装](https://github.com/rust-lang/rust-clippy/blob/master/clippy_lints/src/significant_drop_tightening.rs)
+- 既知問題: [rust-clippy#12121](https://github.com/rust-lang/rust-clippy/issues/12121) / [rust-clippy#13429](https://github.com/rust-lang/rust-clippy/issues/13429)
+- 解説（コミュニティ）: [fasterthanli.me - A Rust match made in hell](https://fasterthanli.me/articles/a-rust-match-made-in-hell) / [DEV - Notes on temporary values, scope of MutexGuard and match expressions](https://dev.to/nsengupta/rust-notes-on-temporary-values-scope-of-mutexguard-and-match-expressions-3-4c85)

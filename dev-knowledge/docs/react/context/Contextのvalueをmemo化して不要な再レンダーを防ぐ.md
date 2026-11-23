@@ -1,6 +1,6 @@
 ---
 title: Context の value を memo 化して不要な再レンダーを防ぐ
-tags: [react, context, useContext, useMemo, performance, rerender]
+tags: [react, context, use-context, use-memo, performance, rerender]
 ---
 
 ## TL;DR
@@ -12,7 +12,7 @@ tags: [react, context, useContext, useMemo, performance, rerender]
 
 ---
 
-## 1. 何が起きるか（動かない例）
+## 1. 何が起きるか（問題のある例）
 
 ```tsx
 function CountProvider({ children }) {
@@ -27,13 +27,13 @@ function CountProvider({ children }) {
 }
 ```
 
-`CountProvider`（または その親）が何らかの理由で再レンダーされるたびに、`value` のオブジェクトリテラルは**新しい参照**になる。React は Context の値の変化を `Object.is` による参照比較で判定するため、中身が同じでも参照が違えば「変わった」と見なし、`useContext(CountContext)` している**すべてのコンシューマが再レンダー**される。
+`CountProvider`（またはその親）が何らかの理由で再レンダーされるたびに、`value` のオブジェクトリテラルは**新しい参照**になる。React は Context の値の変化を `Object.is` による参照比較で判定するため、中身が同じでも参照が違えば「変わった」と見なし、`useContext(CountContext)` している**すべてのコンシューマが再レンダー**される。
 
 `count` が変わっていない再レンダー（兄弟 state の更新、親の再レンダー等）でもコンシューマが巻き込まれる点が無駄。
 
 ---
 
-## 2. 解決（動く例）
+## 2. 解決（改善例）
 
 ```tsx
 function CountProvider({ children }) {
@@ -58,7 +58,8 @@ function CountProvider({ children }) {
 `value` がオブジェクトや配列でなく**プリミティブ単体**（数値・文字列・boolean）なら、参照同一性の問題は起きないので `useMemo` は不要。
 
 ```tsx
-<ThemeContext.Provider value={theme}>  // theme が "light" 等の文字列なら memo 不要
+// theme が "light" 等の文字列なら memo 不要
+<ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>
 ```
 
 memo が要るのは「**毎レンダー新しい参照が作られるオブジェクト/配列/関数**を value に載せるとき」。
@@ -69,8 +70,8 @@ memo が要るのは「**毎レンダー新しい参照が作られるオブジ�
 
 `useMemo` は「**値が変わっていないのに**再レンダーされる」無駄を防ぐだけ。値が実際に変わったときは、その Context を読む**全コンシューマ**が再レンダーされる仕様自体は変わらない（React の Context は selector を持たない）。
 
-- 頻繁に変わる値と滅多に変わらない値が混在する場合は、**Context を分割**する（例: state と dispatch を分ける → 別記事参照）。
-- 巨大 state で部分購読したいなら、Context 単体では限界があり、`useSyncExternalStore` ベースの自前ストアや状態管理ライブラリの検討対象になる（CLAUDE.md 方針: 新ライブラリは基本入れないので、まずは分割で対処）。
+- 頻繁に変わる値と滅多に変わらない値が混在する場合は、**Context を分割**する（例: [state と dispatch を Context で分割する](./stateとdispatchをContextで分割する.md)）。
+- 巨大 state で部分購読したいなら、Context 単体では限界があり、`useSyncExternalStore` ベースの自前ストアや状態管理ライブラリの検討対象になる（依存を増やしたくない場合は、まず Context 分割や `useSyncExternalStore` で対処する）。
 
 ---
 
