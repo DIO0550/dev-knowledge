@@ -52,11 +52,35 @@ const u: UserId = UserId.from("u_1");
 // const bad: OrderId = u; // ✗ 型エラー：ブランドが異なり代入不可
 ```
 
-- `unique symbol` キーにより外部プロパティと衝突せず、補完も汚れにくい。Mapped Type により `Name` が異なる Brand は構造的に非互換になる。
+- `unique symbol` キーにより外部プロパティと衝突せず、補完も汚れにくい。Brand はコンパイル時だけの存在で、実行時プロパティは増えずコスト 0 で扱える。
 - `as` を使うのは `from()` の内部だけ。呼び出し側は cast を書かず、**生成の境界が 1 箇所に閉じる**。
+
+### なぜ値を Mapped Type にするのか
+
+ブランド値を単なるリテラル（`{ readonly [brand]: Name }`）にすると、複数ブランドを重ねたときに交差型が壊れる。`{ readonly [brand]: "A" } & { readonly [brand]: "B" }` は `[brand]: "A" & "B"` となり `never` に潰れてしまう。
+
+`{ readonly [K in Name]: true }` にしておくと、`{ readonly A: true } & { readonly B: true }` と合成でき、「A かつ B のブランド」をそのまま表現できる。単一ブランドしか使わないならリテラル版でも足りるが、合成可能性を残すなら Mapped Type 版が安全。
+
+### 検証を伴う生成（assertion 関数）
+
+形式チェックとブランド付与を同時に行いたい場合は、TypeScript の assertion 関数に閉じ込める手もある。
+
+```ts
+function assertUserId(raw: string): asserts raw is UserId {
+  if (!/^u_/.test(raw)) {
+    throw new Error(`invalid UserId: ${raw}`);
+  }
+}
+```
 
 ## まとめ
 
-- 文字列キーの `__brand` 形式は衝突や補完汚染が起きる（値型を `string` にすると cross-assign も防げない）。`unique symbol` キー + Mapped Type にする。
-- Brand の cast は companion の `from()` に集約し、ドメイン外へ `as` を漏らさない。
-- 「同じ構造だが別物」を型レベルで分離でき、`string` 同士の取り違えをコンパイル時に検出できる。
+- 文字列キーの `__brand` 形式は衝突や補完汚染が起きる（値型を `string` にすると cross-assign も防げない）。`unique symbol` キー ＋ Mapped Type にする。
+- Mapped Type（`{ readonly [K in Name]: true }`）にしておくと、複数のブランドを交差型で合成しても `never` に潰れない。
+- Brand はコンパイル時のみ（実行時コスト 0）。生成の `as` は companion の `from()` か assertion 関数に集約し、ドメイン外へ漏らさない。
+
+## 参考
+
+- [Branded Types | Learning TypeScript](https://www.learningtypescript.com/articles/branded-types)
+- [TypeScript: Playground Example - Nominal Typing](https://www.typescriptlang.org/play/typescript/language-extensions/nominal-typing.ts.html)
+- [Branded Types | Effect Documentation](https://effect.website/docs/code-style/branded-types/)
