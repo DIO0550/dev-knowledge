@@ -95,7 +95,7 @@ struct Node {
 | `indextree` | `NodeId` | 世代付き再利用 | 木専用。単一 `Vec` に全ノード。`RefCell` を排して通常の `&mut` にでき、`Vec` のようにスレッド間で送れる |
 | `petgraph` | `NodeIndex` / `EdgeIndex` | `Graph` は削除で index がずれる | 汎用グラフアルゴリズム。index 安定性が要るなら `StableGraph`（ただし O(e') の削除コストと穴あき） |
 
-一時的に組んで捨てるだけなら、crate を足さず自前の `Vec` + newtype で十分（このリポジトリの「新しいライブラリは基本入れない」方針とも整合する）。
+一時的に組んで捨てるだけなら、外部 crate を足さず自前の `Vec` + newtype で十分。
 
 ### 4. 隣接リストのマップ型: `HashMap` の順序に注意
 
@@ -105,7 +105,7 @@ struct Node {
 
 実測（同一バイナリを 3 回実行）:
 
-```
+```text
 hash : ["f", "a", "g", "e", "c", "d", "b", "h"]
 hash : ["f", "h", "c", "a", "g", "b", "e", "d"]
 hash : ["d", "g", "b", "e", "c", "f", "h", "a"]
@@ -244,22 +244,22 @@ by_name.sort_by_key(|&id| arena.get(id).name.clone());
 
 ## 参考
 
-- Niko Matsakis「Modeling graphs in Rust using vector indices」（index ベースの原典。利点と欠点の両方）: https://smallcultfollowing.com/babysteps/blog/2015/04/06/modeling-graphs-in-rust-using-vector-indices/
-- Catherine West「My RustConf 2018 Closing Keynote」（世代付き index、`Rc<RefCell>` 回避）: https://kyren.github.io/2018/09/14/rustconf-talk.html
-- rustc dev guide「Memory Management in Rustc」（arena allocation と interning）: https://rustc-dev-guide.rust-lang.org/memory.html
-- `rustc_index::IndexVec`（型付き index がコンパイル時に誤用を弾く）: https://doc.rust-lang.org/beta/nightly-rustc/rustc_index/vec/struct.IndexVec.html
-- `newtype_index!` マクロ: https://doc.rust-lang.org/stable/nightly-rustc/rustc_index/macro.newtype_index.html
-- The Rust Book 15.6「Reference Cycles Can Leak Memory」（`Weak` による親リンク）: https://doc.rust-lang.org/book/ch15-06-reference-cycles.html
-- 「Learn Rust With Entirely Too Many Linked Lists」第 4 章（`Rc<RefCell>` 批判）: https://rust-unofficial.github.io/too-many-lists/fourth.html
-- 同 Drop の章（深い連鎖の drop が再帰する）: https://rust-unofficial.github.io/too-many-lists/first-drop.html
-- `std::collections::HashMap`（反復順は arbitrary、ランダムシード）: https://doc.rust-lang.org/std/collections/struct.HashMap.html
-- `std::collections::BTreeMap`（キー順で反復）: https://doc.rust-lang.org/std/collections/struct.BTreeMap.html
-- `Entry::or_default`: https://doc.rust-lang.org/std/collections/hash_map/enum.Entry.html
-- slice のソート（`sort_by_key` は安定、`sort_unstable_by_key` は in-place）: https://doc.rust-lang.org/std/primitive.slice.html
-- `rustc_data_structures::stack::ensure_sufficient_stack`（rustc が `stacker` でスタックを伸ばしている）: https://doc.rust-lang.org/stable/nightly-rustc/rustc_data_structures/stack/fn.ensure_sufficient_stack.html
-- `std::thread`（spawn したスレッドの既定スタックは 2 MiB、メインスレッドは対象外）: https://doc.rust-lang.org/std/thread/index.html
-- Rust Reference「Limits」（`recursion_limit` はコンパイル時の再帰の上限）: https://doc.rust-lang.org/reference/attributes/limits.html
-- arena crate: `typed-arena` https://docs.rs/typed-arena/latest/typed_arena/ ／ `id-arena` https://docs.rs/id-arena/latest/id_arena/ ／ `generational-arena` https://docs.rs/generational-arena/latest/generational_arena/ ／ `slotmap` https://docs.rs/slotmap/latest/slotmap/ ／ `indextree` https://docs.rs/indextree/latest/indextree/ ／ `petgraph` https://docs.rs/petgraph/latest/petgraph/
+- [Niko Matsakis「Modeling graphs in Rust using vector indices」（index ベースの原典。利点と欠点の両方）](https://smallcultfollowing.com/babysteps/blog/2015/04/06/modeling-graphs-in-rust-using-vector-indices/)
+- [Catherine West「My RustConf 2018 Closing Keynote」（世代付き index、`Rc<RefCell>` 回避）](https://kyren.github.io/2018/09/14/rustconf-talk.html)
+- [rustc dev guide「Memory Management in Rustc」（arena allocation と interning）](https://rustc-dev-guide.rust-lang.org/memory.html)
+- [`rustc_index::IndexVec`（型付き index がコンパイル時に誤用を弾く）](https://doc.rust-lang.org/beta/nightly-rustc/rustc_index/vec/struct.IndexVec.html)
+- [`newtype_index!` マクロ](https://doc.rust-lang.org/stable/nightly-rustc/rustc_index/macro.newtype_index.html)
+- [The Rust Book 15.6「Reference Cycles Can Leak Memory」（`Weak` による親リンク）](https://doc.rust-lang.org/book/ch15-06-reference-cycles.html)
+- [「Learn Rust With Entirely Too Many Linked Lists」第 4 章（`Rc<RefCell>` 批判）](https://rust-unofficial.github.io/too-many-lists/fourth.html)
+- [同 Drop の章（深い連鎖の drop が再帰する）](https://rust-unofficial.github.io/too-many-lists/first-drop.html)
+- [`std::collections::HashMap`（反復順は arbitrary、ランダムシード）](https://doc.rust-lang.org/std/collections/struct.HashMap.html)
+- [`std::collections::BTreeMap`（キー順で反復）](https://doc.rust-lang.org/std/collections/struct.BTreeMap.html)
+- [`Entry::or_default`](https://doc.rust-lang.org/std/collections/hash_map/enum.Entry.html)
+- [slice のソート（`sort_by_key` は安定、`sort_unstable_by_key` は in-place）](https://doc.rust-lang.org/std/primitive.slice.html)
+- [`rustc_data_structures::stack::ensure_sufficient_stack`（rustc が `stacker` でスタックを伸ばしている）](https://doc.rust-lang.org/stable/nightly-rustc/rustc_data_structures/stack/fn.ensure_sufficient_stack.html)
+- [`std::thread`（spawn したスレッドの既定スタックは 2 MiB、メインスレッドは対象外）](https://doc.rust-lang.org/std/thread/index.html)
+- [Rust Reference「Limits」（`recursion_limit` はコンパイル時の再帰の上限）](https://doc.rust-lang.org/reference/attributes/limits.html)
+- arena crate: [`typed-arena`](https://docs.rs/typed-arena/latest/typed_arena/) / [`id-arena`](https://docs.rs/id-arena/latest/id_arena/) / [`generational-arena`](https://docs.rs/generational-arena/latest/generational_arena/) / [`slotmap`](https://docs.rs/slotmap/latest/slotmap/) / [`indextree`](https://docs.rs/indextree/latest/indextree/) / [`petgraph`](https://docs.rs/petgraph/latest/petgraph/)
 
 ### 検証環境
 

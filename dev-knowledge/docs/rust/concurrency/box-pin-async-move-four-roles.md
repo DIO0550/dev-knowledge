@@ -7,12 +7,12 @@ tags: [rust, async, pin, box, dyn-future, trait-object, plugin-architecture]
 
 - `Box::pin(async move { ... })` という1行のイディオムには **4つの独立した役割**が同時に詰まっている。
 - ① `async move { ... }` で匿名 Future を生成、② `Box` でヒープに置きサイズ不定(DST)を解消、③ `Pin` で位置固定し自己参照を保護、④ trait オブジェクト境界で `dyn Future` として型消去。
-- AFIT / RPITIT が安定化した現代でも、**trait オブジェクト(`Box`)として格納したい文脈**では今もこの形が必要。
+- AFIT / RPITIT が安定化した現代でも、**trait オブジェクト（`Box<dyn Plugin>`）として格納したい文脈**では今もこの形が必要。
 - 普通の `async fn` を `.await` するだけなら `Box::pin` は不要。要るのは「型を統一したいとき」(trait object, `Vec` に詰める, 再帰 async fn)。
 
 ## このドキュメントの射程
 
-`trait` で非同期メソッドを定義し、その実装を `Box` のようにトレイトオブジェクトとして保持するアーキテクチャ(プラグイン管理、ハンドラ登録、ミドルウェアチェーンなど)で頻出するイディオムの分解。
+`trait` で非同期メソッドを定義し、その実装を `Box<dyn Plugin>` のようにトレイトオブジェクトとして保持するアーキテクチャ(プラグイン管理、ハンドラ登録、ミドルウェアチェーンなど)で頻出するイディオムの分解。
 
 ## 原因 ― なぜそのまま `async fn` を trait に書けないことがあるのか
 
@@ -62,7 +62,7 @@ impl Plugin for LoggerPlugin {
 
 ### ② `Box` ― ヒープに置いてサイズを確定させる
 
-各 impl が生成する Future は**全部異なる匿名型**になる。`dyn Future` というトレイトオブジェクトでまとめたいが、`dyn Future` は **DST(Dynamically Sized Type)**でサイズ不定。値として直接スタックに置けず、関数からそのまま返せない。
+各 impl が生成する Future は**全部異なる匿名型**になる。`dyn Future` というトレイトオブジェクトでまとめたいが、`dyn Future` は **DST**（Dynamically Sized Type）でサイズ不定。値として直接スタックに置けず、関数からそのまま返せない。
 
 `Box::new` でヒープにアロケートすると、戻り値はポインタ＋メタデータ(fat pointer)として**サイズが固定**される。これで関数戻り値や `Vec` の要素にできるようになる。
 
@@ -70,7 +70,7 @@ impl Plugin for LoggerPlugin {
 
 `async` ブロック由来のステートマシンは、`.await` を跨いで内部参照を持ち得るため `!Unpin` の可能性がある。ヒープに置いただけでは、ヒープ上のオブジェクトを別の場所へムーブされる余地が残る。`Pin` で包むことで「この `Box` が指すヒープ上のアドレスから動かない」ことを型レベルで宣言する。
 
-`Box::pin(x)` は `Pin::new(Box::new(x))` 相当の便利コンストラクタ。`Box` 越しのピン留めは、ヒープに置けばオブジェクトのアドレスは外から動かしようがないので安全に成立する。
+`Box::pin(x)` は `Pin::from(Box::new(x))`（`Box::into_pin(Box::new(x))`）相当の便利コンストラクタ。`Box` 越しのピン留めは、ヒープに置けばオブジェクトのアドレスは外から動かしようがないので、`!Unpin` な型でも安全に成立する。
 
 ### ④ `dyn Future + Send + 'a` ― 型消去
 
@@ -86,7 +86,7 @@ type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
 
 構築フローで見ると、内側から外側へ:
 
-```
+```text
 async move { ... }                   // ① 匿名 Future を作る
         ↓
 Box::new(...)                        // ② ヒープへ。サイズ確定
@@ -107,7 +107,7 @@ as Pin<Box<dyn Future<Output = T>>>  // ④ 型消去。trait object 戻り型�
 逆に必要なケース:
 
 - `Vec<Box<dyn Future<Output = T>>>` のように動的なコレクションに詰める。
-- `trait` の戻り型を統一して `Box` で受ける。
+- `trait` の戻り型を統一して `Box<dyn Plugin>` で受ける。
 - 再帰 async fn(自分自身を `.await` する。サイズが無限になるため明示的にヒープ化が必須)。
 
 ## まとめ

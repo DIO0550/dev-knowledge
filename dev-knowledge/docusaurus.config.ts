@@ -31,8 +31,8 @@ const config: Config = {
   // useful metadata like html lang. For example, if your site is Chinese, you
   // may want to replace "en" with "zh-Hans".
   i18n: {
-    defaultLocale: "en",
-    locales: ["en"],
+    defaultLocale: "ja",
+    locales: ["ja"],
   },
 
   presets: [
@@ -93,6 +93,18 @@ const config: Config = {
               label: "React",
               to: "/docs/category/react",
             },
+            {
+              label: "Rust",
+              to: "/docs/category/rust",
+            },
+            {
+              label: "TypeScript",
+              to: "/docs/category/typescript",
+            },
+            {
+              label: "Data Modeling",
+              to: "/docs/category/data-modeling",
+            },
           ],
         },
         {
@@ -110,6 +122,7 @@ const config: Config = {
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
+      additionalLanguages: ["java", "bash", "diff", "csharp", "fsharp", "makefile"],
     },
   } satisfies Preset.ThemeConfig,
 };

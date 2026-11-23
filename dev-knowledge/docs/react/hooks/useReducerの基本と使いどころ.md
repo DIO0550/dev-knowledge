@@ -1,6 +1,6 @@
 ---
 title: useReducer の基本・パターン・useState からの書き換え
-tags: [react, hooks, useReducer, useState, reducer, dispatch, typescript, discriminated-union, state-machine, form]
+tags: [react, hooks, use-reducer, use-state, reducer, dispatch, typescript, discriminated-union, state-machine, form]
 ---
 
 ## TL;DR
@@ -292,5 +292,5 @@ function Form() {
 
 ## 参考
 
-- React 公式 useReducer リファレンス（シグネチャ・init による遅延初期化・dispatch・action の慣習・カウンター/フォーム例）: https://react.dev/reference/react/useReducer
-- React 公式「Extracting State Logic into a Reducer」（useState→useReducer の 3 ステップ書き換え・action 設計・使いどころ・reducer を純粋に保つ）: https://react.dev/learn/extracting-state-logic-into-a-reducer
+- [React 公式 useReducer リファレンス（シグネチャ・init による遅延初期化・dispatch・action の慣習・カウンター/フォーム例）](https://react.dev/reference/react/useReducer)
+- [React 公式「Extracting State Logic into a Reducer」（useState→useReducer の 3 ステップ書き換え・action 設計・使いどころ・reducer を純粋に保つ）](https://react.dev/learn/extracting-state-logic-into-a-reducer)

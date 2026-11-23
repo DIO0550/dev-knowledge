@@ -1,5 +1,5 @@
 ---
-title: TypeScriptで共通部分を持つ型を組む — `&`合成 / `interface extends` / ジェネリクスの使い分け
+title: TypeScriptで共通部分を持つ型を組む — &合成 / interface extends / ジェネリクスの使い分け
 tags: [typescript, intersection-type, interface, extends, generics, discriminated-union, type-design, tsc-performance]
 ---
 
@@ -75,7 +75,7 @@ type Events = Entity<TextBody> | Entity<CountBody> | Entity<CoordsBody>;  // 上
 
 ## 参考
 
-- microsoft/TypeScript Wiki, Performance — Preferring Interfaces Over Intersections — https://github.com/microsoft/TypeScript/wiki/Performance
-- microsoft/TypeScript PR #37762（衝突する交差型を `never` に縮約し、理由を診断に表示） — https://github.com/microsoft/TypeScript/pull/37762
-- mkosir/typescript-style-guide, Discriminated Union — https://mkosir.github.io/typescript-style-guide
-- WorkWave RouteManager UI coding patterns — Prefer discriminated unions over optional keys — https://dev.to/noriste/routemanager-ui-coding-patterns-typescript-42hb
+- [microsoft/TypeScript Wiki, Performance — Preferring Interfaces Over Intersections](https://github.com/microsoft/TypeScript/wiki/Performance)
+- [microsoft/TypeScript PR #37762（衝突する交差型を `never` に縮約し、理由を診断に表示）](https://github.com/microsoft/TypeScript/pull/37762)
+- [mkosir/typescript-style-guide, Discriminated Union](https://mkosir.github.io/typescript-style-guide)
+- [WorkWave RouteManager UI coding patterns — Prefer discriminated unions over optional keys](https://dev.to/noriste/routemanager-ui-coding-patterns-typescript-42hb)

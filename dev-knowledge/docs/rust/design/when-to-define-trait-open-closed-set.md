@@ -1,20 +1,6 @@
 ---
 title: Rust で trait を定義すべきか — ポリモーフィズム 4 分類と open/closed set による判断
-tags:
-  [
-    rust,
-    trait,
-    polymorphism,
-    enum,
-    dyn-trait,
-    generics,
-    dyn-compatibility,
-    sealed-trait,
-    deref-polymorphism,
-    anti-pattern,
-    api-design,
-    rust-design-patterns,
-  ]
+tags: [rust, trait, polymorphism, enum, dyn-trait, generics, dyn-compatibility, sealed-trait, deref-polymorphism, anti-pattern, api-design, rust-design-patterns]
 ---
 
 ## TL;DR
@@ -59,7 +45,7 @@ Stack Overflow の定番回答でも「トレイトを実装する構造体の�
 
 ### 3. public trait はカプセル化を壊す（Rust 特有）
 
-trait のメソッドシグネチャに現れる型は、その trait が public である以上すべて public にせざるを得ない。「関数シグネチャに現れる型は、その関数と同等以上の可視性を持たねばならない」というルールが transitive に伝播するため、内部型が公開 API に漏れ出す。
+trait のメソッドシグネチャに現れる型は、その trait が public である以上すべて public にせざるを得ない。「関数シグネチャに現れる型は、その関数と同等以上の可視性を持たねばならない」というルールが推移的（連鎖的）に伝播するため、内部型が公開 API に漏れ出す。
 
 ```rust
 mod db_logger {
@@ -351,7 +337,7 @@ fn main() {
 
 #### dyn 互換性（旧・オブジェクト安全）※用語が変わっている
 
-トレイトオブジェクトとして呼べるトレイトは現在 **dyn compatible（dyn 互換）** と呼ぶ。以前は "object safe / object safety" と呼ばれていた（rustdoc も「古いバージョンでは object safety と呼ばれていた」と併記する）。dyn 互換の条件は、すべてのスーパートレイトが dyn 互換で、関連型・関連定数を持たず、ジェネリクスに依存するメソッドがないこと。`Self` を返すメソッド（`Clone` など）も不可。
+トレイトオブジェクトとして呼べるトレイトは現在 **dyn compatible（dyn 互換）** と呼ぶ。以前は "object safe / object safety" と呼ばれていた（rustdoc も「古いバージョンでは object safety と呼ばれていた」と併記する）。dyn 互換の主な条件は、すべてのスーパートレイトが dyn 互換で、関連定数・GAT（ジェネリック関連型）を持たず、ジェネリクスに依存するメソッドや `Self` を返すメソッド（`Clone` など）がないこと（通常の関連型自体は持てるが、`dyn Iterator<Item = i32>` のように利用時に具体型を指定する必要がある）。
 
 ```rust
 trait Broken {
@@ -547,7 +533,7 @@ impl Format for Yaml { fn extension(&self) -> &'static str { "yaml" } }
 
 #### ケース J：`Deref` による継承の模倣（アンチパターン）
 
-Rust Design Patterns（rust-unofficial）が公式にアンチパターンとして掲載。Rust に struct の継承はなくコンポジションを使うべきで、`Deref` はカスタムポインタ型のためのもの（ポインタ to T を T にするためのものであって、異なる型同士の変換のためのものではない）。
+Rust Design Patterns（rust-unofficial）が公式にアンチパターンとして掲載。Rust に struct の継承はなくコンポジションを使うべきで、`Deref` はカスタムポインタ型のためのもの（`T` へのポインタから `T` を取り出すためのものであって、異なる型同士の変換のためのものではない）。
 
 ```rust
 use std::ops::Deref;
@@ -632,31 +618,17 @@ impl Better {
 
 ## 参考
 
-- The Rust Programming Language ch18-01「Characteristics of Object-Oriented Languages」— 継承を採らない理由、bounded parametric polymorphism
-  https://doc.rust-lang.org/book/ch18-01-what-is-oo.html
-- The Rust Programming Language ch18-02「Using Trait Objects That Allow for Values of Different Types」
-  https://doc.rust-lang.org/book/ch18-02-trait-objects.html
-- Rust Blog「Abstraction without overhead: traits in Rust」(Aaron Turon, 2015) — trait は Rust における唯一のインターフェース概念
-  https://blog.rust-lang.org/2015/05/11/traits/
-- Rust API Guidelines: Checklist（C-COMMON-TRAITS / C-SEALED / C-OBJECT）
-  https://rust-lang.github.io/api-guidelines/checklist.html
-- Rust API Guidelines: Future proofing（sealed trait パターン）
-  https://rust-lang.github.io/api-guidelines/future-proofing.html
-- Rust Design Patterns: Deref polymorphism（アンチパターン）
-  https://rust-unofficial.github.io/patterns/anti_patterns/deref.html
-- Rust Design Patterns: Generics as Type Classes
-  https://rust-unofficial.github.io/patterns/functional/generics-type-classes.html
-- Possible Rust「Enum or Trait Object」— closed set / open set の整理
-  https://www.possiblerust.com/guide/enum-or-trait-object
-- Julio Merino「Rust traits and dependency injection」— public trait による可視性の漏れ
-  https://jmmv.dev/2022/04/rust-traits-and-dependency-injection.html
-- Lobsters 上の議論（NVI / クレート間コヒーレンス問題）
-  https://lobste.rs/s/yqm4uc/rust_traits_dependency_injection
-- Microsoft RustTraining「Rust Patterns & Engineering How-Tos」ch02 Traits In Depth — vtable / fat pointer / enum dispatch / 拡張トレイト
-  https://microsoft.github.io/RustTraining/rust-patterns-book/ch02-traits-in-depth.html
-- Announcing Rust 1.86.0 — trait upcasting の安定化
-  https://blog.rust-lang.org/2025/04/03/Rust-1.86.0/
-- lang-team issue #286「rename "object safety" to "dyn compatibility"」
-  https://github.com/rust-lang/lang-team/issues/286
-- Zenn「Rust での抽象化 3パターンについて」— Rust way 的には多態は enum が基本
-  https://zenn.dev/j5ik2o/articles/045737392958a3
+- [The Rust Programming Language ch18-01「Characteristics of Object-Oriented Languages」— 継承を採らない理由、bounded parametric polymorphism](https://doc.rust-lang.org/book/ch18-01-what-is-oo.html)
+- [The Rust Programming Language ch18-02「Using Trait Objects That Allow for Values of Different Types」](https://doc.rust-lang.org/book/ch18-02-trait-objects.html)
+- [Rust Blog「Abstraction without overhead: traits in Rust」(Aaron Turon, 2015) — trait は Rust における唯一のインターフェース概念](https://blog.rust-lang.org/2015/05/11/traits/)
+- [Rust API Guidelines: Checklist（C-COMMON-TRAITS / C-SEALED / C-OBJECT）](https://rust-lang.github.io/api-guidelines/checklist.html)
+- [Rust API Guidelines: Future proofing（sealed trait パターン）](https://rust-lang.github.io/api-guidelines/future-proofing.html)
+- [Rust Design Patterns: Deref polymorphism（アンチパターン）](https://rust-unofficial.github.io/patterns/anti_patterns/deref.html)
+- [Rust Design Patterns: Generics as Type Classes](https://rust-unofficial.github.io/patterns/functional/generics-type-classes.html)
+- [Possible Rust「Enum or Trait Object」— closed set / open set の整理](https://www.possiblerust.com/guide/enum-or-trait-object)
+- [Julio Merino「Rust traits and dependency injection」— public trait による可視性の漏れ](https://jmmv.dev/2022/04/rust-traits-and-dependency-injection.html)
+- [Lobsters 上の議論（NVI / クレート間コヒーレンス問題）](https://lobste.rs/s/yqm4uc/rust_traits_dependency_injection)
+- [Microsoft RustTraining「Rust Patterns & Engineering How-Tos」ch02 Traits In Depth — vtable / fat pointer / enum dispatch / 拡張トレイト](https://microsoft.github.io/RustTraining/rust-patterns-book/ch02-traits-in-depth.html)
+- [Announcing Rust 1.86.0 — trait upcasting の安定化](https://blog.rust-lang.org/2025/04/03/Rust-1.86.0/)
+- [lang-team issue #286「rename "object safety" to "dyn compatibility"」](https://github.com/rust-lang/lang-team/issues/286)
+- [Zenn「Rust での抽象化 3パターンについて」— Rust way 的には多態は enum が基本](https://zenn.dev/j5ik2o/articles/045737392958a3)

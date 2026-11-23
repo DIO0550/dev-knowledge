@@ -1,6 +1,6 @@
 ---
 title: Rust の matches! マクロ — match 式への糖衣で bool を返すパターン判定
-tags: [rust, macro, matches, pattern-matching, macro_rules, std]
+tags: [rust, macro, matches, pattern-matching, macro-rules, std]
 ---
 
 ## TL;DR
@@ -65,9 +65,9 @@ let bar = Some(4);
 assert!(matches!(bar, Some(x) if x > 2));
 
 // enum の is_xxx メソッドの定番実装
-enum Foo { A, B(T) }
+enum Foo<T> { A, B(T) }
 
-impl Foo {
+impl<T> Foo<T> {
     fn is_b(&self) -> bool {
         matches!(self, Foo::B(_))
     }

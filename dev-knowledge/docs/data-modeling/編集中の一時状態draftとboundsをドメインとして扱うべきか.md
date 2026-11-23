@@ -64,8 +64,8 @@ export const TextEdit = {
 
 ## 参考
 
-- Domain State VS UI State（Sangwin Gawande, Medium）: https://sangwin.medium.com/domain-state-vs-ui-state-5f43dc33c8e4
-- tldraw Docs - Persistence（document/session 分割）: https://tldraw.dev/docs/persistence
-- フロントエンドのロジックを凝集して、UIコンポーネントから切り離してみた（ABEJA Tech Blog）: https://tech-blog.abeja.asia/entry/frontend-logic-refactor-202510
-- Always-Valid Domain Model（Vladimir Khorikov）: https://enterprisecraftsmanship.com/posts/always-valid-domain-model/
-- Domain-Driven Design for Modern Frontend Apps（Feature-Sliced Design）: https://feature-sliced.design/blog/ddd-for-frontend-devs
+- [Domain State VS UI State（Sangwin Gawande, Medium）](https://sangwin.medium.com/domain-state-vs-ui-state-5f43dc33c8e4)
+- [tldraw Docs - Persistence（document/session 分割）](https://tldraw.dev/docs/persistence)
+- [フロントエンドのロジックを凝集して、UIコンポーネントから切り離してみた（ABEJA Tech Blog）](https://tech-blog.abeja.asia/entry/frontend-logic-refactor-202510)
+- [Always-Valid Domain Model（Vladimir Khorikov）](https://enterprisecraftsmanship.com/posts/always-valid-domain-model/)
+- [Domain-Driven Design for Modern Frontend Apps（Feature-Sliced Design）](https://feature-sliced.design/blog/ddd-for-frontend-devs)

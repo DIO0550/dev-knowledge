@@ -9,7 +9,7 @@ tags: [linux, command, cp, install, coreutils, permission, mode, owner, umask, m
 - **`cp -p`（= `--preserve=mode,ownership,timestamps`）** で初めて「モード・所有者・グループ・時刻をそのまま保持」になる。`cp -a` はさらに ACL/SELinux/拡張属性まで含めて保持。
 - **`install`** は **コピー元の権限を無視**し、`-m` 未指定なら常に **`rwxr-xr-x`（≒0755）** を、`-m` 指定ならその値を「決め打ちで」設定する。`-o`/`-g` で所有者・グループも一発指定でき、`cp + chmod + chown + mkdir` を 1 コマンドに統合できる。
 - だから Makefile の `install:` ターゲットで多用される。実行ファイルをそのまま実行可能な 0755 で、設定ファイルを `-m 0644` で配置、といった用途。
-- ユーザの理解「cp は権限そのまま／install は変更できる」は**おおむね正しいが不正確**。正確には「素の cp は環境(umask・実行ユーザ)依存／install は結果のモードを自分で決め打ち」。
+- よくある理解「`cp` は権限そのまま／`install` は変更できる」は**おおむね近いが不正確**。正確には「素の `cp` は環境（umask・実行ユーザー）依存／`install` は結果のモードを自分で決め打ち」。
 
 ## このドキュメントの射程
 
@@ -43,7 +43,7 @@ $ umask                       # 0022
 $ ls -l src.sh
 -rwxr-xr-x 1 alice alice 10 Jun 22 10:00 src.sh    # 元は 755・実行ビットあり
 
-# デフォルト cp: 所有者は実行ユーザ、時刻は現在に変わる
+# デフォルト cp: 所有者は実行ユーザー、時刻は現在に変わる
 $ cp src.sh dst.sh
 $ ls -l dst.sh
 -rwxr-xr-x 1 bob bob 10 Jun 22 12:34 dst.sh
@@ -65,7 +65,7 @@ $ ls -l src.sh
 # -m 指定なし → 元の 600 を無視して 0755 になる
 $ install src.sh /opt/bin/app
 $ ls -l /opt/bin/app
--rwxr-xr-x 1 bob bob 10 Jun 22 12:34 app           # 0755・所有者は実行ユーザ・時刻は現在
+-rwxr-xr-x 1 bob bob 10 Jun 22 12:34 app           # 0755・所有者は実行ユーザー・時刻は現在
 
 # モード・所有者・グループを一発指定（-o は root のみ）
 $ sudo install -D -m 0644 -o root -g staff config.conf /etc/myapp/config.conf
@@ -106,11 +106,11 @@ install:
 
 - 「コピー元の属性を引き継ぎたい」なら `cp -p`（素の `cp` は umask 適用＋所有者/時刻が変わる点に注意）。
 - 「配置先のパーミッション・所有者を決め打ちしたい／実行ファイルやデータを適切なモードで設置したい」なら `install`。
-- ユーザの当初理解は方向性は正しい。正確には **「素の cp は環境依存でコピー、install は結果のモードを自分で確定させる」**。
+- 整理すると **「素の cp は環境依存でコピー、install は結果のモードを自分で確定させる」** という対比になる。
 
 ## 参考
 
-- install invocation (GNU Coreutils): https://www.gnu.org/software/coreutils/manual/html_node/install-invocation.html
-- cp invocation (GNU Coreutils): https://www.gnu.org/software/coreutils/manual/html_node/cp-invocation.html
-- install(1) — Linux manual page (man7.org, coreutils 9.11): https://man7.org/linux/man-pages/man1/install.1.html
-- cp(1) — Linux manual page (man7.org): https://man7.org/linux/man-pages/man1/cp.1.html
+- [install invocation (GNU Coreutils)](https://www.gnu.org/software/coreutils/manual/html_node/install-invocation.html)
+- [cp invocation (GNU Coreutils)](https://www.gnu.org/software/coreutils/manual/html_node/cp-invocation.html)
+- [install(1) — Linux manual page (man7.org, coreutils 9.11)](https://man7.org/linux/man-pages/man1/install.1.html)
+- [cp(1) — Linux manual page (man7.org)](https://man7.org/linux/man-pages/man1/cp.1.html)

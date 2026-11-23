@@ -1,5 +1,5 @@
 ---
-title: Rust で自作関数に `collect` と名付けない（Iterator::collect との衝突）
+title: Rust で自作関数に collect と名付けない（Iterator::collect との衝突）
 tags: [rust, naming, api-guidelines, iterator, collect, method-resolution, clippy]
 ---
 

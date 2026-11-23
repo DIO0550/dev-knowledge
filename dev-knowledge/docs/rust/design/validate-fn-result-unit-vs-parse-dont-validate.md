@@ -1,6 +1,6 @@
 ---
-title: Rust の validate 関数は `Result<(), E>` でいいのか（parse, don't validate）
-tags: [rust, error-handling, api-design, validation, newtype, parse-dont-validate, type-driven-design, TryFrom, clippy]
+title: Rust の validate 関数は Result<(), E> でいいのか（parse, don't validate）
+tags: [rust, error-handling, api-design, validation, newtype, parse-dont-validate, type-driven-design, try-from, clippy]
 ---
 
 ## TL;DR
@@ -193,10 +193,10 @@ pub struct Username(String);
 
 ## 参考
 
-- The Rust Programming Language ch.9.3 "To panic! or Not to panic!" — Custom Types for Validation: https://doc.rust-lang.org/book/ch09-03-to-panic-or-not-to-panic.html
-- Rust API Guidelines — Interoperability (C-CONV-TRAITS): https://rust-lang.github.io/api-guidelines/interoperability.html
-- Rust API Guidelines — Checklist (C-NEWTYPE / C-CUSTOM-TYPE / C-CTOR): https://rust-lang.github.io/api-guidelines/checklist.html
-- Alexis King, "Parse, don't validate": https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/
-- validator crate: https://github.com/Keats/validator
-- nutype crate: https://github.com/greyblake/nutype
-- Clippy `result_unit_err`: https://rust-lang.github.io/rust-clippy/master/index.html#result_unit_err
+- [The Rust Programming Language ch.9.3 "To panic! or Not to panic!" — Custom Types for Validation](https://doc.rust-lang.org/book/ch09-03-to-panic-or-not-to-panic.html)
+- [Rust API Guidelines — Interoperability (C-CONV-TRAITS)](https://rust-lang.github.io/api-guidelines/interoperability.html)
+- [Rust API Guidelines — Checklist (C-NEWTYPE / C-CUSTOM-TYPE / C-CTOR)](https://rust-lang.github.io/api-guidelines/checklist.html)
+- [Alexis King, "Parse, don't validate"](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/)
+- [validator crate](https://github.com/Keats/validator)
+- [nutype crate](https://github.com/greyblake/nutype)
+- [Clippy `result_unit_err`](https://rust-lang.github.io/rust-clippy/master/index.html#result_unit_err)

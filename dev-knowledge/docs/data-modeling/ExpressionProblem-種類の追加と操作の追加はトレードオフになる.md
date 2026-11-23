@@ -1,6 +1,6 @@
 ---
 title: Expression Problem — 「種類の追加」と「操作の追加」はトレードオフになる
-tags: [TypeScript, expression-problem, discriminated-union, interface, polymorphism, domain-modeling, design, OOP, FP, object-algebra, visitor-pattern]
+tags: [typescript, expression-problem, discriminated-union, interface, polymorphism, domain-modeling, design, oop, fp, object-algebra, visitor-pattern]
 ---
 
 ## TL;DR
@@ -233,12 +233,12 @@ expr(evalMul); // 14
 
 ## 参考
 
-- Philip Wadler, "The Expression Problem"（1998-11-12, Java Genericity メーリングリスト） https://homepages.inf.ed.ac.uk/wadler/papers/expression/expression.txt
-- Wikipedia, "Expression problem" https://en.wikipedia.org/wiki/Expression_problem
-- Eli Bendersky, "The Expression Problem and its solutions"（2016） https://eli.thegreenplace.net/2016/the-expression-problem-and-its-solutions/
+- [Philip Wadler, "The Expression Problem"（1998-11-12, Java Genericity メーリングリスト）](https://homepages.inf.ed.ac.uk/wadler/papers/expression/expression.txt)
+- [Wikipedia, "Expression problem"](https://en.wikipedia.org/wiki/Expression_problem)
+- [Eli Bendersky, "The Expression Problem and its solutions"（2016）](https://eli.thegreenplace.net/2016/the-expression-problem-and-its-solutions/)
 - J. C. Reynolds, "User-defined types and procedural data structures as complementary approaches to type abstraction"（1975）
 - S. Krishnamurthi, M. Felleisen, D. P. Friedman, "Synthesizing Object-Oriented and Functional Design to Promote Re-Use"（ECOOP '98）
-- B. C. d. S. Oliveira, W. R. Cook, "Extensibility for the Masses: Practical Extensibility with Object Algebras"（ECOOP 2012） / 解説ページ http://ropas.snu.ac.kr/~bruno/oa/
-- Y. Wang, B. C. d. S. Oliveira, "The Expression Problem, Trivially!"（Modularity 2016） https://dl.acm.org/doi/10.1145/2889443.2889448
+- B. C. d. S. Oliveira, W. R. Cook, "Extensibility for the Masses: Practical Extensibility with Object Algebras"（ECOOP 2012） / [解説ページ](http://ropas.snu.ac.kr/~bruno/oa/)
+- [Y. Wang, B. C. d. S. Oliveira, "The Expression Problem, Trivially!"（Modularity 2016）](https://dl.acm.org/doi/10.1145/2889443.2889448)
 - W. Swierstra, "Data types à la carte"（JFP 2008）
 - Scott Wlaschin『関数型ドメインモデリング』— 「選択型（choice type）」の用語

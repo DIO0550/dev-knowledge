@@ -14,7 +14,7 @@ tags: [rust, type, type-alias, newtype, id-type, type-safety, api-guidelines, do
 ## このドキュメントの射程
 
 - **対象**: `UserId` のようなドメインの ID 型を、型エイリアスにするか newtype にするかの判断と、newtype にする場合の最小実装。
-- **対象外**: 型エイリアス一般の仕様（→ `rust-type-alias`）、トレイト内の `type`（→ `rust-associated-type`）、serde などクレート固有の連携。
+- **対象外**: 型エイリアス一般の仕様（→ [Rust の type は新しい型ではなく「別名」](./type-alias-is-not-new-type.md)）、トレイト内の `type`（→ [関連型とジェネリクス引数の使い分け](./associated-type-vs-generic-parameter.md)）、serde などクレート固有の連携。
 - **確認方法**: 方針は Rust API Guidelines / The Rust Programming Language で確認。コード例とエラーは rustc 1.75.0（edition 2021）でコンパイルして確認（メッセージ文言は新しい rustc では多少異なる）。
 
 ## 原因
@@ -129,8 +129,8 @@ fn main() {
 
 ## 参考
 
-- Rust API Guidelines — Type safety（Newtypes provide static distinctions, C-NEWTYPE）: https://rust-lang.github.io/api-guidelines/type-safety.html
-- Rust API Guidelines — Checklist（Structs have private fields, C-STRUCT-PRIVATE）: https://rust-lang.github.io/api-guidelines/checklist.html
-- The Rust Programming Language — Advanced Types（Type Synonyms and Type Aliases / Newtype にランタイムコストは無い）: https://doc.rust-lang.org/book/ch20-03-advanced-types.html
-- The Rust Reference — Type aliases: https://doc.rust-lang.org/reference/items/type-aliases.html
-- std — `From` / `Into`: https://doc.rust-lang.org/std/convert/trait.From.html
+- [Rust API Guidelines — Type safety（Newtypes provide static distinctions, C-NEWTYPE）](https://rust-lang.github.io/api-guidelines/type-safety.html)
+- [Rust API Guidelines — Checklist（Structs have private fields, C-STRUCT-PRIVATE）](https://rust-lang.github.io/api-guidelines/checklist.html)
+- [The Rust Programming Language — Advanced Types（Type Synonyms and Type Aliases / Newtype にランタイムコストは無い）](https://doc.rust-lang.org/book/ch20-03-advanced-types.html)
+- [The Rust Reference — Type aliases](https://doc.rust-lang.org/reference/items/type-aliases.html)
+- [std — `From` / `Into`](https://doc.rust-lang.org/std/convert/trait.From.html)

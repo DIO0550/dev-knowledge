@@ -14,7 +14,7 @@ tags: [react, hooks, folder-structure, colocation, feature-based-architecture, b
 
 Feature フォルダ形式（feature 配下に `components/`・`hooks/` などの技術別フォルダを持つ構成）で、**特定のコンポーネントだけが使う hook** をどこに配置すべきかを扱う。
 
-```
+```text
 features/todo/
 ├── components/
 │   └── TodoList/...
@@ -48,7 +48,7 @@ Feature-Sliced Design はセグメント名について「purpose（なぜ）を
 
 `components/` + `hooks/` 型を維持する場合、**使用スコープの 3 段階**で置き場所を決める:
 
-```
+```text
 src/
 ├── hooks/                          # ③ feature横断で共有される汎用hook
 │   └── useDebounce.ts
@@ -85,10 +85,10 @@ freeCodeCamp の記事の具体例が判断タイミングとして分かりや�
 
 ## 参考
 
-- Josh W. Comeau - Delightful React File/Directory Structure: https://www.joshwcomeau.com/react/file-structure/
-- profy.dev - Popular React Folder Structures and Screaming Architecture: https://profy.dev/article/react-folder-structure
-- Robin Wieruch - React Folder Structure Best Practices: https://www.robinwieruch.de/react-folder-structure/
-- freeCodeCamp - The Best File Structure for Your React Components: https://www.freecodecamp.org/news/best-file-structure-for-react-components/
-- bulletproof-react - Project Structure: https://github.com/alan2207/bulletproof-react/blob/master/docs/project-structure.md
-- Sandro Roth - How to structure your React projects: https://sandroroth.com/blog/project-structure/
-- Feature-Sliced Design - Tutorial（セグメント名の原則）: https://feature-sliced.design/docs/get-started/tutorial
+- [Josh W. Comeau - Delightful React File/Directory Structure](https://www.joshwcomeau.com/react/file-structure/)
+- [profy.dev - Popular React Folder Structures and Screaming Architecture](https://profy.dev/article/react-folder-structure)
+- [Robin Wieruch - React Folder Structure Best Practices](https://www.robinwieruch.de/react-folder-structure/)
+- [freeCodeCamp - The Best File Structure for Your React Components](https://www.freecodecamp.org/news/best-file-structure-for-react-components/)
+- [bulletproof-react - Project Structure](https://github.com/alan2207/bulletproof-react/blob/master/docs/project-structure.md)
+- [Sandro Roth - How to structure your React projects](https://sandroroth.com/blog/project-structure/)
+- [Feature-Sliced Design - Tutorial（セグメント名の原則）](https://feature-sliced.design/docs/get-started/tutorial)

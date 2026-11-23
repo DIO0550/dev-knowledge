@@ -11,12 +11,12 @@ tags: [rust, type, type-alias, newtype, result-alias, type-complexity, clippy, t
   2. **ジェネリクスの一部を固定する**（`std::io::Result<T>` = `Result<T, io::Error>`）。
 - **型安全（取り違え防止）が欲しいならエイリアスではなく newtype**（`struct Meters(u32);`）。エイリアス同士は取り違えてもコンパイルが通る。
 - 落とし穴: ① タプル構造体のコンストラクタとしては使えない ② ジェネリクス引数の境界（`T: Send`）は**検査されない** ③ 外部クレートの型への別名に inherent `impl` は書けない。
-- トレイトの中の `type Item;` は同じキーワードでも「関連型」で役割が違う → 別記事 `rust-associated-type`。
+- トレイトの中の `type Item;` は同じキーワードでも「関連型」で役割が違う → 別記事 [関連型とジェネリクス引数の使い分け](./associated-type-vs-generic-parameter.md)。
 
 ## このドキュメントの射程
 
 - **対象**: アイテムとしての `type`（モジュール直下・ブロック内の `type X = ...;`）。何者なのか、いつ使うか、いつ使わないか。
-- **対象外**: トレイト / impl 内の `type`（関連型・GAT）→ 別記事 `rust-associated-type`。`type X = impl Trait;`（TAIT）は 2026-09 時点で unstable（`#![feature(type_alias_impl_trait)]`）なので扱わない。
+- **対象外**: トレイト / impl 内の `type`（関連型・GAT）→ 別記事 [関連型とジェネリクス引数の使い分け](./associated-type-vs-generic-parameter.md)。`type X = impl Trait;`（TAIT）は 2026-09 時点で unstable（`#![feature(type_alias_impl_trait)]`）なので扱わない。
 - **確認方法**: 仕様は Rust Reference / The Rust Programming Language / Rust By Example / std ドキュメントで確認。コード例は rustc 1.75.0（edition 2021）で実際にコンパイルして確認（エラーメッセージの文言は新しい rustc では多少異なる）。
 
 ## 原因
@@ -92,7 +92,7 @@ fn find(key: &str) -> Result<u32> {
 }
 ```
 
-注意: 上のように引数 1 個で定義すると、そのモジュール内で `Result<u32, ParseIntError>` と 2 引数で書けなくなる（E0107: type alias takes 1 generic argument but 2 generic arguments were supplied）。**デフォルト型引数**を付けると両方書ける。`anyhow::Result` がこの形（`pub type Result<T, E = Error> = Result<T, E>;`）。
+注意: 上のように引数 1 個で定義すると、そのモジュール内で `Result<u32, ParseIntError>` と 2 引数で書けなくなる（E0107: type alias takes 1 generic argument but 2 generic arguments were supplied）。**デフォルト型引数**を付けると両方書ける。`anyhow::Result` がこの形（`pub type Result<T, E = Error> = core::result::Result<T, E>;`）。
 
 ```rust
 use std::num::ParseIntError;
@@ -180,13 +180,13 @@ impl Names { fn first_name(&self) -> &str { &self[0] } }
 
 ## 参考
 
-- The Rust Reference — Type aliases: https://doc.rust-lang.org/reference/items/type-aliases.html
-- The Rust Reference — Glossary（Local type: "Type aliases do not affect locality"）: https://doc.rust-lang.org/reference/glossary.html
-- The Rust Programming Language — Advanced Types（Type Synonyms and Type Aliases / Newtype）: https://doc.rust-lang.org/book/ch20-03-advanced-types.html
-- The Rust Programming Language — Advanced Traits（Newtype で外部トレイトを実装）: https://doc.rust-lang.org/book/ch20-02-advanced-traits.html
-- Rust By Example — Aliasing: https://doc.rust-lang.org/rust-by-example/types/alias.html
-- std — Keyword `type`: https://doc.rust-lang.org/std/keyword.type.html
-- rustc lint `type_alias_bounds`: https://doc.rust-lang.org/nightly/nightly-rustc/rustc_lint/builtin/static.TYPE_ALIAS_BOUNDS.html
-- Clippy `type_complexity`: https://rust-lang.github.io/rust-clippy/master/index.html#type_complexity
-- Announcing Rust 1.37.0（enum バリアントをエイリアス経由で参照）: https://blog.rust-lang.org/2019/08/15/Rust-1.37.0/
-- anyhow::Result（デフォルト型引数付きエイリアスの実例）: https://docs.rs/anyhow/latest/anyhow/type.Result.html
+- [The Rust Reference — Type aliases](https://doc.rust-lang.org/reference/items/type-aliases.html)
+- [The Rust Reference — Glossary（Local type: "Type aliases do not affect locality"）](https://doc.rust-lang.org/reference/glossary.html)
+- [The Rust Programming Language — Advanced Types（Type Synonyms and Type Aliases / Newtype）](https://doc.rust-lang.org/book/ch20-03-advanced-types.html)
+- [The Rust Programming Language — Advanced Traits（Newtype で外部トレイトを実装）](https://doc.rust-lang.org/book/ch20-02-advanced-traits.html)
+- [Rust By Example — Aliasing](https://doc.rust-lang.org/rust-by-example/types/alias.html)
+- [std — Keyword `type`](https://doc.rust-lang.org/std/keyword.type.html)
+- [rustc lint `type_alias_bounds`](https://doc.rust-lang.org/nightly/nightly-rustc/rustc_lint/builtin/static.TYPE_ALIAS_BOUNDS.html)
+- [Clippy `type_complexity`](https://rust-lang.github.io/rust-clippy/master/index.html#type_complexity)
+- [Announcing Rust 1.37.0（enum バリアントをエイリアス経由で参照）](https://blog.rust-lang.org/2019/08/15/Rust-1.37.0/)
+- [anyhow::Result（デフォルト型引数付きエイリアスの実例）](https://docs.rs/anyhow/latest/anyhow/type.Result.html)

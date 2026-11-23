@@ -1,18 +1,6 @@
 ---
 title: Rust のクロージャトレイト Fn / FnMut / FnOnce の使い分け
-tags:
-  [
-    rust,
-    closure,
-    trait,
-    fn,
-    fnmut,
-    fnonce,
-    trait-bound,
-    api-design,
-    function-pointer,
-    dyn-trait,
-  ]
+tags: [rust, closure, trait, fn, fnmut, fnonce, trait-bound, api-design, function-pointer, dyn-trait]
 ---
 
 ## TL;DR
@@ -54,7 +42,7 @@ pub trait Fn<Args>: FnMut<Args> {
 
 ### 継承関係が「渡せる範囲」を決める
 
-```
+```text
 Fn  ⊂  FnMut  ⊂  FnOnce
 できることが多い       制約がゆるい（渡せるものが多い）
 ```

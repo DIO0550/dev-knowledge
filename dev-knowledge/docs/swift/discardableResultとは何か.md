@@ -1,6 +1,6 @@
 ---
 title: "@discardableResult とは何か"
-tags: [swift, attribute, discardableResult, API設計, コンパイラ警告, fluent-interface]
+tags: [swift, attribute, discardable-result, api-design, compiler-warning, fluent-interface]
 ---
 
 ## TL;DR

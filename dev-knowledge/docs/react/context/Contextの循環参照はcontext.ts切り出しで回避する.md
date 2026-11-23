@@ -15,7 +15,7 @@ tags: [react, context, circular-dependency, module-structure, architecture]
 
 `ToastProvider` が `ToastContainer` を内蔵描画したい。だが以下の import 経路で循環参照が起きる。
 
-```
+```text
 ToastProvider.tsx  ──import──▶  ToastContainer.tsx
       ▲                                │
       └──────────import───────────────┘

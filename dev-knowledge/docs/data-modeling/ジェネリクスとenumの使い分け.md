@@ -1,17 +1,6 @@
 ---
 title: ジェネリクスとenumの使い分け — 判断軸は「型が似ている」ではなく「誰が型を決めるか」
-tags:
-  [
-    rust,
-    typescript,
-    generics,
-    enum,
-    discriminated-union,
-    type-design,
-    polymorphism,
-    expression-problem,
-    api-design,
-  ]
+tags: [rust, typescript, generics, enum, discriminated-union, type-design, polymorphism, expression-problem, api-design]
 ---
 
 ## TL;DR
@@ -50,7 +39,7 @@ Rust公式Bookの定義では、ジェネリクスは型を抽象化し、トレ
 
 ### 判断フロー
 
-```
+```text
 固有部分の種類を自分で列挙できる？
   ├─ Yes → enum（Rust）/ 判別可能ユニオン（TS）
   │        共通部分は struct のフィールド / `Base &` で一度だけ書く
@@ -141,10 +130,10 @@ function bad<T extends { kind: string }>(r: { body: T }) {
 - The Rust Programming Language, ch10 Generic Types / ch18-01 Characteristics of OO Languages（bounded parametric polymorphism）
 - Rust API Guidelines, Flexibility（C-GENERIC, C-OBJECT）
 - Effective Rust, Item 12: Understand the trade-offs between generics and trait objects
-- matklad, "Code Smell: Concrete Abstraction" (2020) — https://matklad.github.io/2020/08/15/concrete-abstraction.html
-- Matthias Endler (corrode), "Be Simple" (2025) — https://corrode.dev/blog/simple/
-- purplesyringa, "The expression problem and Rust" (2025) — https://purplesyringa.moe/blog/the-expression-problem-and-rust/
-- Brandon's Website, "Three Kinds of Polymorphism in Rust" — https://www.brandons.me/blog/polymorphism-in-rust
-- Total TypeScript, "Generics aren't always the answer" — https://www.totaltypescript.com/workshops/advanced-react-with-typescript/using-generics-with-components/generics-arent-always-the-answer
-- microsoft/TypeScript Wiki, Performance — Preferring Interfaces Over Intersections — https://github.com/microsoft/TypeScript/wiki/Performance
-- mkosir/typescript-style-guide, Discriminated Union — https://mkosir.github.io/typescript-style-guide
+- [matklad, "Code Smell: Concrete Abstraction" (2020)](https://matklad.github.io/2020/08/15/concrete-abstraction.html)
+- [Matthias Endler (corrode), "Be Simple" (2025)](https://corrode.dev/blog/simple/)
+- [purplesyringa, "The expression problem and Rust" (2025)](https://purplesyringa.moe/blog/the-expression-problem-and-rust/)
+- [Brandon's Website, "Three Kinds of Polymorphism in Rust"](https://www.brandons.me/blog/polymorphism-in-rust)
+- [Total TypeScript, "Generics aren't always the answer"](https://www.totaltypescript.com/workshops/advanced-react-with-typescript/using-generics-with-components/generics-arent-always-the-answer)
+- [microsoft/TypeScript Wiki, Performance — Preferring Interfaces Over Intersections](https://github.com/microsoft/TypeScript/wiki/Performance)
+- [mkosir/typescript-style-guide, Discriminated Union](https://mkosir.github.io/typescript-style-guide)

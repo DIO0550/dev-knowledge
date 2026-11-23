@@ -1,6 +1,6 @@
 ---
 title: impl ヘッダーの '_ は「それぞれ別の新しいライフタイム」になる
-tags: [rust, lifetime, anonymous-lifetime, lifetime-elision, impl, impl-header, variance, rust-2018, rust-1.31, E0726]
+tags: [rust, lifetime, anonymous-lifetime, lifetime-elision, impl, impl-header, variance, rust-2018, rust-1.31, e0726]
 ---
 
 ## TL;DR
@@ -132,11 +132,11 @@ impl<T: fmt::Debug> fmt::Debug for Wrapper<'_, T> {
 
 （2026-10-15 確認、rustc 1.97.0 で動作確認）
 
-- rust-lang/rust PR #49251「support elision in impl headers」（nikomatsakis, 2018-03 マージ）: https://github.com/rust-lang/rust/pull/49251
-- 追跡 Issue #15872（`impl_header_lifetime_elision`。#54778 で 1.31 に安定化）: https://github.com/rust-lang/rust/issues/15872
-- RFC 2115 argument_lifetimes: https://rust-lang.github.io/rfcs/2115-argument-lifetimes.html
-- The Rustonomicon — Lifetime Elision: https://doc.rust-lang.org/nomicon/lifetime-elision.html
-- The Rust Reference — Lifetime elision（`'_` と関数での省略の一般規則。impl ヘッダーを直接扱った記述はない）: https://doc.rust-lang.org/reference/lifetime-elision.html
-- Announcing Rust 1.31 and Rust 2018 — More lifetime elision rules（旧 Edition Guide「The anonymous lifetime」の転送先）: https://blog.rust-lang.org/2018/12/06/Rust-1.31-and-rust-2018/
-- E0726: https://doc.rust-lang.org/error_codes/E0726.html
-- users.rust-lang.org「Confused about the anonymous lifetime `'_`」: https://users.rust-lang.org/t/confused-about-the-anonymous-lifetime/138106
+- [rust-lang/rust PR #49251「support elision in impl headers」（nikomatsakis, 2018-03 マージ）](https://github.com/rust-lang/rust/pull/49251)
+- [追跡 Issue #15872（`impl_header_lifetime_elision`。#54778 で 1.31 に安定化）](https://github.com/rust-lang/rust/issues/15872)
+- [RFC 2115 argument_lifetimes](https://rust-lang.github.io/rfcs/2115-argument-lifetimes.html)
+- [The Rustonomicon — Lifetime Elision](https://doc.rust-lang.org/nomicon/lifetime-elision.html)
+- [The Rust Reference — Lifetime elision（`'_` と関数での省略の一般規則。impl ヘッダーを直接扱った記述はない）](https://doc.rust-lang.org/reference/lifetime-elision.html)
+- [Announcing Rust 1.31 and Rust 2018 — More lifetime elision rules（旧 Edition Guide「The anonymous lifetime」の転送先）](https://blog.rust-lang.org/2018/12/06/Rust-1.31-and-rust-2018/)
+- [E0726](https://doc.rust-lang.org/error_codes/E0726.html)
+- [users.rust-lang.org「Confused about the anonymous lifetime `'_`」](https://users.rust-lang.org/t/confused-about-the-anonymous-lifetime/138106)

@@ -16,7 +16,7 @@ tags: [rust, type, associated-type, trait, generics, iterator, gat, operator-ove
 ## このドキュメントの射程
 
 - **対象**: トレイト定義 / トレイト impl の中に書く `type`（関連型）。書き方・ルール・ジェネリクス引数との使い分け。
-- **対象外**: モジュール直下の `type X = Y;`（型エイリアス）→ 別記事 `rust-type-alias`。inherent impl の関連型・関連型のデフォルト値・`impl Trait` を関連型に置く機能は stable ではないので扱わない。
+- **対象外**: モジュール直下の `type X = Y;`（型エイリアス）→ 別記事 [Rust の type は新しい型ではなく「別名」](./type-alias-is-not-new-type.md)。inherent impl の関連型・関連型のデフォルト値・`impl Trait` を関連型に置く機能は stable ではないので扱わない。
 - **確認方法**: 仕様は Rust Reference / The Rust Programming Language / Rust Blog で確認。コード例は rustc 1.75.0（edition 2021）で実際にコンパイルして確認（エラーメッセージの文言は新しい rustc では多少異なる）。
 
 ## 原因
@@ -162,10 +162,10 @@ impl LendingIterator for Windows {
 
 ## 参考
 
-- The Rust Reference — Associated Items（Associated types）: https://doc.rust-lang.org/reference/items/associated-items.html
-- The Rust Reference — Type aliases（関連型として使う場合の規則）: https://doc.rust-lang.org/reference/items/type-aliases.html
-- The Rust Programming Language — Advanced Traits（Associated Types / Default Generic Type Parameters and Operator Overloading）: https://doc.rust-lang.org/book/ch20-02-advanced-traits.html
-- std — Keyword `type`（associated type declaration / definition の例）: https://doc.rust-lang.org/std/keyword.type.html
-- std::ops::Add: https://doc.rust-lang.org/std/ops/trait.Add.html
-- std::convert::TryFrom: https://doc.rust-lang.org/std/convert/trait.TryFrom.html
-- Rust Blog — Generic associated types to be stable in Rust 1.65: https://blog.rust-lang.org/2022/10/28/gats-stabilization.html
+- [The Rust Reference — Associated Items（Associated types）](https://doc.rust-lang.org/reference/items/associated-items.html)
+- [The Rust Reference — Type aliases（関連型として使う場合の規則）](https://doc.rust-lang.org/reference/items/type-aliases.html)
+- [The Rust Programming Language — Advanced Traits（Associated Types / Default Generic Type Parameters and Operator Overloading）](https://doc.rust-lang.org/book/ch20-02-advanced-traits.html)
+- [std — Keyword `type`（associated type declaration / definition の例）](https://doc.rust-lang.org/std/keyword.type.html)
+- [std::ops::Add](https://doc.rust-lang.org/std/ops/trait.Add.html)
+- [std::convert::TryFrom](https://doc.rust-lang.org/std/convert/trait.TryFrom.html)
+- [Rust Blog — Generic associated types to be stable in Rust 1.65](https://blog.rust-lang.org/2022/10/28/gats-stabilization.html)

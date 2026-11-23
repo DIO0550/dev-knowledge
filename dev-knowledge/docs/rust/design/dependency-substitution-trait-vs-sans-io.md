@@ -155,13 +155,13 @@ Rust フォーラムでよく引かれる指摘として、Rust のカプセル�
 
 ## 参考
 
-- Firezone, "sans-IO: The secret to effective Rust for network services" — https://www.firezone.dev/blog/sans-io
-- howtocodeit, "Master Hexagonal Architecture in Rust" — https://www.howtocodeit.com/guides/master-hexagonal-architecture-in-rust
-- Julio Merino, "Rust traits and dependency injection" — https://jmmv.dev/2022/04/rust-traits-and-dependency-injection.html
-- joshuayou, "Dependency Injection in Rust"（関連型による静的 DI）— https://github.com/joshuayoudev/rust-dependency-injection-example
-- Gary Bernhardt, "Boundaries"（Functional Core, Imperative Shell の原典）— https://www.destroyallsoftware.com/talks/boundaries
-- The Rust Programming Language, "Characteristics of Object-Oriented Languages" — https://doc.rust-lang.org/book/ch18-01-what-is-oo.html
-- Rust Users Forum, "Cannot find function"（カプセル化の単位は module、関連関数は self とコンストラクタに限定する意見）— https://users.rust-lang.org/t/cannot-find-function/50663
-- Rust Users Forum, "When to use functions and when to define structs and use methods on them?" — https://users.rust-lang.org/t/when-to-use-functions-and-when-to-define-structs-and-use-methods-on-them/84952
-- R. Tyler Croy, "Considering object-orientedness from the Rust perspective"（struct を状態中心に設計させられる）— https://brokenco.de/2023/02/22/object-oriented-compulsions.html
-- RFC 2229, "Capture disjoint fields"（クロージャと self の借用衝突）— https://rust-lang.github.io/rfcs/2229-capture-disjoint-fields.html
+- [Firezone, "sans-IO: The secret to effective Rust for network services"](https://www.firezone.dev/blog/sans-io)
+- [howtocodeit, "Master Hexagonal Architecture in Rust"](https://www.howtocodeit.com/guides/master-hexagonal-architecture-in-rust)
+- [Julio Merino, "Rust traits and dependency injection"](https://jmmv.dev/2022/04/rust-traits-and-dependency-injection.html)
+- [joshuayou, "Dependency Injection in Rust"（関連型による静的 DI）](https://github.com/joshuayoudev/rust-dependency-injection-example)
+- [Gary Bernhardt, "Boundaries"（Functional Core, Imperative Shell の原典）](https://www.destroyallsoftware.com/talks/boundaries)
+- [The Rust Programming Language, "Characteristics of Object-Oriented Languages"](https://doc.rust-lang.org/book/ch18-01-what-is-oo.html)
+- [Rust Users Forum, "Cannot find function"（カプセル化の単位は module、関連関数は self とコンストラクタに限定する意見）](https://users.rust-lang.org/t/cannot-find-function/50663)
+- [Rust Users Forum, "When to use functions and when to define structs and use methods on them?"](https://users.rust-lang.org/t/when-to-use-functions-and-when-to-define-structs-and-use-methods-on-them/84952)
+- [R. Tyler Croy, "Considering object-orientedness from the Rust perspective"（struct を状態中心に設計させられる）](https://brokenco.de/2023/02/22/object-oriented-compulsions.html)
+- [RFC 2229, "Capture disjoint fields"（クロージャと self の借用衝突）](https://rust-lang.github.io/rfcs/2229-capture-disjoint-fields.html)

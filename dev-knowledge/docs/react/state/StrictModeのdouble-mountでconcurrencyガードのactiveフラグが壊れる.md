@@ -17,7 +17,7 @@ tags: [react, strict-mode, concurrency, cleanup, double-mount]
 
 React StrictMode は dev で **mount → cleanup → remount** をシミュレートする。この cleanup で `deactivateProject`（`active = false`）が走ると、同じ ref の version が**死んだまま remount**され、その後の全 command が「もう active じゃない」と判定されて破棄されてしまう。
 
-```
+```text
 mount    → version.active = true
 cleanup  → version.active = false   // StrictMode の擬似アンマウント
 remount  → 同じ ref を使い回すが active は false のまま
@@ -41,7 +41,7 @@ remount  → 同じ ref を使い回すが active は false のまま
 - unmount / cleanup は `active = false` にするのではなく、**世代を 1 つ進めるだけ**。
 - StrictMode の double-mount で cleanup → remount しても、remount 側が新しい世代で動き出すので、「死んだまま復帰できない」状態が発生しない。
 
-```
+```text
 mount    → 世代 = 1
 cleanup  → 世代 = 2（進めるだけ、無効化フラグは持たない）
 remount  → 世代 = 3 で通常どおり動作

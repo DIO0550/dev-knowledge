@@ -1,6 +1,6 @@
 ---
 title: Spring Boot のサービスクラスを古典派スタイルで速くテストする
-tags: [java, spring-boot, テスト, junit, mockito, 古典派, classicist, ソシアブルテスト, ユニットテスト, サービス層, testcontainers]
+tags: [java, spring-boot, testing, junit, mockito, classicist-testing, classicist, sociable-testing, unit-testing, service-layer, testcontainers]
 ---
 
 ## TL;DR
@@ -127,19 +127,19 @@ class OrderRepositoryIntegrationTest {
 
 ### 速度・Spring テスト構成
 
-- Spring Boot Reference — Testing Spring Boot Applications（`@SpringBootTest` は完全コンテキスト、スライスは限定ロード、`@DataJpaTest`）: https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html
-- Spring Framework Reference — Context Caching（同一構成でのコンテキスト再利用、キャッシュキー、既定 maxSize 32・LRU）: https://docs.spring.io/spring-framework/reference/testing/testcontext-framework/ctx-management/caching.html
-- Baeldung — Mockito and JUnit 5: Using ExtendWith（`MockitoExtension` は Spring コンテナを起動しない）: https://www.baeldung.com/mockito-junit-5-extension
-- Spring Boot 3.5 Release Notes（管理依存: JUnit Jupiter 5.12 / Mockito 5.17）: https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.5-Release-Notes
+- [Spring Boot Reference — Testing Spring Boot Applications（`@SpringBootTest` は完全コンテキスト、スライスは限定ロード、`@DataJpaTest`）](https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html)
+- [Spring Framework Reference — Context Caching（同一構成でのコンテキスト再利用、キャッシュキー、既定 maxSize 32・LRU）](https://docs.spring.io/spring-framework/reference/testing/testcontext-framework/ctx-management/caching.html)
+- [Baeldung — Mockito and JUnit 5: Using ExtendWith（`MockitoExtension` は Spring コンテナを起動しない）](https://www.baeldung.com/mockito-junit-5-extension)
+- [Spring Boot 3.5 Release Notes（管理依存: JUnit Jupiter 5.12 / Mockito 5.17）](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.5-Release-Notes)
 
 ### 古典派 vs ロンドン派・ソシアブルテスト
 
-- Martin Fowler「Mocks Aren't Stubs」（状態/振る舞い検証、古典派/モック派、実装への密結合とリファクタ耐性、Detroit/London 呼称の出所）: https://martinfowler.com/articles/mocksArentStubs.html
-- Martin Fowler「UnitTest」bliki（sociable/solitary の定義。用語は Jay Fields 考案、mockist=solitary / classicist=sociable）: https://martinfowler.com/bliki/UnitTest.html
-- James Shore「Testing Without Mocks: A Pattern Language」（sociable tests + Nullables、プロセス外/インフラ依存だけを置換する実践）: https://www.jamesshore.com/v2/projects/nullables/testing-without-mocks
+- [Martin Fowler「Mocks Aren't Stubs」（状態/振る舞い検証、古典派/モック派、実装への密結合とリファクタ耐性、Detroit/London 呼称の出所）](https://martinfowler.com/articles/mocksArentStubs.html)
+- [Martin Fowler「UnitTest」bliki（sociable/solitary の定義。用語は Jay Fields 考案、mockist=solitary / classicist=sociable）](https://martinfowler.com/bliki/UnitTest.html)
+- [James Shore「Testing Without Mocks: A Pattern Language」（sociable tests + Nullables、プロセス外/インフラ依存だけを置換する実践）](https://www.jamesshore.com/v2/projects/nullables/testing-without-mocks)
 
 ### Testcontainers・DI
 
-- Testcontainers Guide「The simplest way to replace H2 with a real database for testing」: https://testcontainers.com/guides/replace-h2-with-real-database-for-testing/
-- Spring 公式ブログ「Improved Testcontainers Support in Spring Boot 3.1」（`@ServiceConnection` 導入、2023-06-23）: https://spring.io/blog/2023/06/23/improved-testcontainers-support-in-spring-boot-3-1/
-- Spring Framework Reference — Constructor-based Dependency Injection（「Spring team generally advocates constructor injection」、テスト容易性）: https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-collaborators.html
+- [Testcontainers Guide「The simplest way to replace H2 with a real database for testing」](https://testcontainers.com/guides/replace-h2-with-real-database-for-testing/)
+- [Spring 公式ブログ「Improved Testcontainers Support in Spring Boot 3.1」（`@ServiceConnection` 導入、2023-06-23）](https://spring.io/blog/2023/06/23/improved-testcontainers-support-in-spring-boot-3-1/)
+- [Spring Framework Reference — Constructor-based Dependency Injection（「Spring team generally advocates constructor injection」、テスト容易性）](https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-collaborators.html)

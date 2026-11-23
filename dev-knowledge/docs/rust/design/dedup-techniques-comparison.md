@@ -6,7 +6,7 @@ tags: [rust, generics, trait, macro, declarative-macro, proc-macro, const-fn, bu
 ## TL;DR
 
 - 重複を消す/コンパイル時に何かする手段は Rust に複数ある。**役割が違う**ので「どれが最強」ではなく「どれが今の問題に合うか」で選ぶ
-- 基本順序: **関数 → ジェネリクス/トレイト → 宣言マクロ → 手続き型マクロ → build.rs**。下に行くほど強力だが、複雑さ・ビルド時間・読みにくさのコストも上がる
+- 基本順序: **関数 → ジェネリクス/トレイト → `const fn` → 宣言マクロ → 手続き型マクロ → build.rs**。下に行くほど強力だが、複雑さ・ビルド時間・読みにくさのコストも上がる
 - 「値が欲しい」なら `const fn`、「コードが欲しい」ならマクロ、と分けると迷わない
 - **困ったら上から順に試して、足りなくなったら一段降りる**のが基本戦略
 
@@ -41,7 +41,7 @@ tags: [rust, generics, trait, macro, declarative-macro, proc-macro, const-fn, bu
 - 使う場面: 「型は違うが API（メソッド・トレイト）が同じ」処理を共通化したいとき
 
 ```rust
-fn process(item: T) { /* ... */ }
+fn process<T: SomeTrait>(item: T) { /* ... */ }
 ```
 
 ### トレイトのデフォルト実装
@@ -143,7 +143,7 @@ macro_rules! impl_getter {
 
 ## まとめ
 
-「重複を消す/コンパイル時に何かする」手段は複数あり、それぞれ役割が違う。**関数 → ジェネリクス → const fn → 宣言マクロ → 手続き型マクロ → build.rs** の順に検討し、足りなくなったら一段降りる。「値が欲しいか、コードが欲しいか」で大きく分かれることだけ覚えておくと迷いにくい。
+「重複を消す/コンパイル時に何かする」手段は複数あり、それぞれ役割が違う。**関数 → ジェネリクス/トレイト → `const fn` → 宣言マクロ → 手続き型マクロ → build.rs** の順に検討し、足りなくなったら一段降りる。「値が欲しいか、コードが欲しいか」で大きく分かれることだけ覚えておくと迷いにくい。
 
 ## 参考
 
@@ -151,4 +151,4 @@ macro_rules! impl_getter {
 - [Macros vs. Functions in Rust: When to Use Which?](https://leapcell.medium.com/macros-vs-functions-in-rust-when-to-use-which-923f90f8d570)
 - [Rust: Generic, Trait, Declarative, and Procedural Macros](https://medium.com/better-programming/rust-generic-trait-declarative-and-procedural-macros-6ff9cd8016de)
 - [Constants in Rust: const, static, const fn & LazyLock](https://env.dev/guides/rust-constants)
-- 関連: 宣言マクロ詳細、const fn 詳細は別記事を参照
+- 関連: [宣言マクロで似た関数定義そのものを共通化する](../macro/declarative-macro-generate-function-definitions.md)、[Rust の const fn とコンパイル時評価](../compile-time/const-fn-compile-time-evaluation.md)
