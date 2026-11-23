@@ -1,24 +1,30 @@
 ---
 title: indexmap を入れるか — 挿入順保持マップの標準ライブラリ代替と依存コストの評価
-tags: [rust, dependency-management, indexmap, minimal-deps, hashmap, cargo]
+tags: [rust, indexmap, hashmap, dependency-management, cargo]
 ---
 
-## 問題
+## TL;DR
 
-挿入順序を保持する `HashMap` が必要な場面で、`indexmap` クレートの導入が提案された。「不要な依存を増やさない」方針のもとで、標準ライブラリで代替できないか、入れるべきかを判断したい。
+- 標準ライブラリの `HashMap` は走査順が不定、`BTreeMap` はキー昇順（`Ord` 順）であり、どちらも**挿入順は保持しない**。
+- **要素数が小さい・走査が主目的なら `Vec<(K, V)>` のみで十分**。一方、**参照 `O(1)` と順序維持を保った削除を両立したいなら `indexmap`** を選ぶ（自前の `Vec` ＋ `HashMap` は削除時の index 整合がバグの温床になりやすい）。
+- 外部クレート追加の是非は感覚ではなく計測で決める。まず `cargo tree -i indexmap` で既に推移的依存（transitive dependency）に含まれていないかを確認するのが最も早い。
 
-判断軸は「**本当にそれ（外部 crate）でないと解決できないか**」。
+## 背景・射程
 
-## 前提: 標準の 2 つのマップは挿入順を保持しない
+挿入順序を保持するマップが必要な場面で、`indexmap` クレートを導入するか、標準ライブラリだけで済ませるかの判断軸と、外部クレートの依存コストを定量評価する手順を整理する。
 
-- `std::collections::HashMap` はイテレーション順が**不定**（ハッシュ・内部状態依存で実行ごとに変わりうる）。
-- `std::collections::BTreeMap` は**キーの昇順（`Ord` 順）**でイテレートする。これは「挿入順」ではない。`1, 3, 2` の順で insert しても `1, 2, 3` で返り、挿入順は失われる。キー順が欲しい場合のみ適切で、挿入順の代替にはならない。
+- 対象：`indexmap` 2.x 前提。
+- 前提として、標準ライブラリの 2 つのマップは挿入順の代替にならない。
+  - `std::collections::HashMap`：イテレーション順が**不定**（ハッシュと内部状態に依存し実行ごとに変わりうる）。
+  - `std::collections::BTreeMap`：**キーの昇順**（`Ord` 順）でイテレートする。`1, 3, 2` の順で挿入しても `1, 2, 3` で返るため、挿入順は失われる。
 
-## 標準ライブラリでの代替パターン
+## 判断軸・比較
 
-### パターン A: `Vec<(K, V)>` のみ（線形探索）
+### 標準ライブラリでの代替パターン
 
-最小構成。小規模 N・挿入順イテレーションが主目的なら最有力。
+#### パターン A：`Vec<(K, V)>` のみ（線形探索）
+
+最小構成。小規模なデータで挿入順の走査が主目的なら最有力になる。
 
 ```rust
 struct VecMap<K, V> {
@@ -42,13 +48,13 @@ impl<K: PartialEq, V> VecMap<K, V> {
 }
 ```
 
-- 計算量: get/insert とも **O(n)**。イテレーションは挿入順のまま。
-- 向く場面: N が小さい（数十〜数百程度）、ルックアップ頻度が低い、順序付きで舐めるのが主目的。
-- 利点: 依存ゼロ。小 N ではキャッシュ効率が良く `HashMap` より速いこともある（要ベンチ）。実装が自明。
+- **計算量**：`get` / `insert` とも `O(n)`。イテレーションは挿入順のまま。
+- **向く場面**：要素数が小さい（数十〜数百程度）、ルックアップ頻度が低い、順序付き走査が主目的。
+- **利点**：依存ゼロで実装が自明。小規模データではキャッシュ局所性が高く、`HashMap` より速いこともある（閾値はベンチマークで確認）。
 
-### パターン B: `Vec<(K, V)>` + `HashMap<K, usize>`（O(1) ルックアップ + 挿入順保持）
+#### パターン B：`Vec<(K, V)>` ＋ `HashMap<K, usize>`（`O(1)` 参照 ＋ 挿入順保持）
 
-`indexmap` 相当を自前で組む定番。
+`indexmap` 相当を標準ライブラリだけで組む定番構成。
 
 ```rust
 use std::collections::HashMap;
@@ -70,77 +76,69 @@ impl<K: Eq + Hash + Clone, V> OrderedMap<K, V> {
             self.order[i].1 = value; // 既存キーは値だけ更新
         } else {
             self.index.insert(key.clone(), self.order.len());
-            self.order.push((key, value)); // 末尾追加で挿入順維持: O(1) 償却
+            self.order.push((key, value)); // 末尾追加で挿入順維持: 償却 O(1)
         }
     }
 }
 ```
 
-- ルックアップ/挿入 O(1) 償却 + 挿入順イテレーションを両立。
-- **キーの二重保持**（`index` と `order` の両方に K）が発生し、K のコピー/メモリが二重にかかる。`indexmap` は内部で K を 1 回だけ持つ構造でこれを回避している。
+- 償却 `O(1)` の参照・挿入と挿入順イテレーションを両立できる。
+- **キーの二重保持**（`index` と `order` の両方に `K` を持つ）が発生する。`indexmap` は内部構造で `K` を 1 回だけ保持してこれを回避している。
+- **削除が最大の難所**：挿入と参照だけなら数十行で書けるが、削除・順序維持・index 整合を同時に満たそうとすると一気に複雑化する。
+  - `Vec::swap_remove(pos)`：`O(1)` で削除できるが、(1) `index` から削除キーを消す、(2) 末尾から移動してきた要素の `index` を `pos` へ張り替える、の 2 手が必須。しかも**挿入順が崩れる**。
+  - `Vec::remove(pos)`：後続をシフトするため挿入順は保たれるが `O(n)` になり、`pos` より後ろの全キーの `index` を -1 する再構築が要る。
+  - tombstone（論理削除）：順序と `O(1)` 削除は保てるが、削除が積もるとメモリと走査コストが膨らみ定期的な compaction が必要になる。
 
-#### 削除が最大の難所
+### `indexmap`（2.x）との比較
 
-自前実装は削除で最も間違えやすい。ここが「自前で LinkedHashMap 相当をやるコスト」の正体。
+`indexmap` は実質的なデファクトスタンダードであり、`serde_json` の `preserve_order` フィーチャも内部で `indexmap` を使用している（無効時は `BTreeMap` によるキー順）。主な特徴は次の通り。
 
-- **`Vec::swap_remove(pos)`**: 末尾要素を穴へ移動して O(1) 削除できるが、(1) `index` から削除キーを消す、(2) **移動してきた末尾要素のキーの index を `pos` に張り替える**、の 2 ステップが必須。忘れると `index` が壊れる。しかも**挿入順が崩れる**。
-- **`Vec::remove(pos)`**: 後続を全シフトするので**挿入順は保たれる**が O(n)。かつ pos より後ろの全キーの index を -1 する再構築が要る。
-- **tombstone（論理削除）**: 物理削除せずマークするだけ。順序も O(1) 削除も保てるが、削除が積もるとメモリと走査コストが膨らみ、定期的な compaction（穴詰め＝index 再構築）が要る。実質「自前で indexmap を再発明」になりバグの温床。
-
-→ 挿入・参照だけなら数十行で書けるが、**削除・順序維持・index 整合を同時に満たすと一気に複雑化**する。
-
-## indexmap を入れる／入れない判断基準
-
-`indexmap` が提供する価値（2.x）:
-
-- **O(1) 平均のルックアップ + 挿入順イテレーション**を、K 二重保持なし・バグなしで提供。
-- 削除の 2 系統を明示的に提供:
-  - `swap_remove`: **O(1)**、末尾と入れ替えるので**順序が崩れる**。
-  - `shift_remove`: **O(n)**、後続をシフトして**挿入順を維持**。
-  - この使い分けを API で強制してくれるのが安全性上の利点（2.x では旧 `remove` は非推奨）。
-- インデックスアクセス（`get_index` 等）、`Slice` ビュー、ソート、Entry API など自前だと面倒な操作が揃う。
-- デフォルトハッシャは std と同じ `RandomState`（SipHash, HashDoS 耐性）。
-
-判断:
+- `O(1)` 平均のルックアップと挿入順イテレーションを、キーの二重保持なしで提供。
+- 削除を 2 系統の API で明示的に分離（2.x では旧 `remove` は非推奨）：
+  - `swap_remove`：`O(1)`、末尾と入れ替えるため**順序が崩れる**。
+  - `shift_remove`：`O(n)`、後続をシフトして**挿入順を維持する**。
+- インデックスアクセス（`get_index` 等）、スライスビュー、ソート、Entry API などが揃っており、デフォルトハッシャも標準と同じ `RandomState`（SipHash）。
 
 | 状況 | 選択 |
 |---|---|
-| N が小さい / 参照が低頻度 / 主目的が挿入順の走査 | **Vec で十分**（入れない） |
-| 削除がない・稀・末尾中心 | **Vec で十分** |
-| N が大きく**キー参照が高頻度**（O(n) が効く） | indexmap |
-| **挿入順維持 + 頻繁な削除**が同時に必要 | indexmap（自前は index ずれバグが現実的リスク） |
-| インデックスアクセス/ソート等の付加操作を使う | indexmap |
+| 要素数が小さい・参照が低頻度・主目的が挿入順の走査 | **`Vec<(K, V)>` で十分** |
+| 削除がない・稀・末尾削除のみ | **`Vec<(K, V)>`（または自前 `OrderedMap`）で十分** |
+| 要素数が大きく**キー参照が高頻度** | `indexmap` |
+| **挿入順維持 ＋ 頻繁な削除**が同時に必要 | `indexmap`（自前は index ずれバグのリスクが高い） |
+| インデックスアクセスやソート等の付加操作を使う | `indexmap` |
 
-- ショートカット: 「参照 O(1) 必須」かつ「削除しつつ順序維持」の**両方**が要るなら indexmap。どちらか一方だけ（特に小 N）なら std/Vec で足りることが多い。
+## 指針
 
-公平な事実として、`indexmap` は実質デファクト。`serde_json` の `preserve_order` フィーチャは内部で `indexmap` を使い（無効時は `BTreeMap`＝キー順）、JSON のキー入力順を保持する。多くのクレートが transitive 依存で既に `indexmap` を引いていることも多く、その場合は追加の実コストがほぼゼロになる。
+### 採否のショートカット
 
-## 依存コストの評価方法
+「参照 `O(1)` が必須」かつ「削除しつつ順序維持が必要」の**両方**を満たすなら `indexmap` を入れる。どちらか一方だけ（特に要素数が小さい場合）なら標準ライブラリで足りることが多い。
 
-crate 追加の是非は感覚でなく計測で決める。手順:
+### 依存コストの計測手順
 
-1. **`cargo tree`** — 依存ツリーと transitive deps を可視化。
-   - `cargo tree -i indexmap`（逆依存）で「既に他クレート経由で入っているか」を確認。既に居るなら追加コストは実質ゼロ。
-   - `cargo tree --duplicate` で同一クレートの複数バージョン混在（例: indexmap 1.x と 2.x 同居）を検出。
-2. **`cargo build --timings`** — クレート単位のコンパイル時間を HTML で出力。追加前後で差分を取る。
-3. **`cargo bloat --release --crates`** — バイナリサイズへの寄与をクレート単位で測る（`cargo install cargo-bloat`）。
-4. **`cargo-udeps`**（nightly）— 宣言したが未使用の依存を検出。
+クレート追加の是非は感覚ではなく、ベースライン測定 → 追加 → 再測定の差分で判断する。
 
-評価の型: **追加前にビルド時間・バイナリサイズをベースライン測定 → 追加 → 同条件で再測定して差分**。まず `cargo tree -i` で「そもそも新規追加になるのか」を確認するのが費用対効果が高い。
+1. **`cargo tree`**：依存ツリーと推移的依存を確認する。
+   - `cargo tree -i indexmap`（逆依存）で他クレート経由ですでに導入済みかを確認する。すでに依存グラフに存在する場合、追加の実コストはほぼゼロになる。
+   - `cargo tree --duplicate` で同一クレートの複数バージョン混在（例：`indexmap` 1.x と 2.x の同居）を検出する。
+2. **`cargo build --timings`**：クレート単位のコンパイル時間を HTML で出力し、追加前後の差分を見る。
+3. **`cargo bloat --release --crates`**：リリースバイナリへのサイズ寄与をクレート単位で測る（`cargo install cargo-bloat`）。
+4. **`cargo-udeps`**（nightly）：宣言済みだが未使用の依存を検出する。
 
-`indexmap` 2.x 自体の依存は軽量: 必須依存は `equivalent`（極小）と `hashbrown`（std の HashMap 実装本体）のみ。`serde` / `rayon` 等は optional でデフォルト無効。「重い crate だから避ける」は少なくとも 2.x デフォルト構成では当たらない（実測で確認）。
+なお `indexmap` 2.x の必須依存は `equivalent` と `hashbrown`（標準 `HashMap` の実装本体）のみで、`serde` / `rayon` 等はデフォルト無効のオプショナル依存であるため、2.x のデフォルト構成自体は軽量。
 
-## バージョン差異（1.x → 2.x）
+### `indexmap` 1.x → 2.x のバージョン差異
 
-- 2.0 で MSRV が 1.64 に引き上げ（最新系はさらに新しい）。
-- **削除メソッドの非推奨化**: `remove` / `remove_entry` / `take` が 2.x で非推奨になり、順序への影響を明示する `swap_remove` 系・`shift_remove` 系に置き換わった。**コード例は 2.x 前提で `swap_remove` / `shift_remove` を使う**。1.x の旧 `remove` は `swap_remove` 相当（順序が崩れる）なので移植時に注意。
+- 2.0 で MSRV が引き上げられた（2.0.0 時点で Rust 1.63 以降、マイナーアップデートで随時引き上げ）。
+- `remove` / `remove_entry` / `take` が 2.x で非推奨となり、順序への影響を明示する `swap_remove` 系・`shift_remove` 系へ置き換わった。1.x の旧 `remove` は `swap_remove` 相当（順序が崩れる）だったため、移行時は意図を確認して使い分ける。
 
-## まとめ・参考
+## まとめ
 
-- 一行まとめ: 「**挿入順の走査だけなら `Vec`、参照 O(1) と順序維持削除の両立が要るなら `indexmap`**」。判断は `cargo tree -i` で「既に依存グラフに居るか」を最初に見るのが早い。
-- 参考（2026-07 時点、indexmap 2.x）:
-  - IndexMap ドキュメント / crate メタデータ（メソッドと計算量・依存・MSRV）: docs.rs `indexmap` / `docs.rs/crate/indexmap/latest`。
-  - indexmap `RELEASES.md`（1.x→2.x 変更点、削除メソッド非推奨）。
-  - `serde_json` の `preserve_order` フィーチャ（lib.rs / serde-rs/json PR #885）。
-  - コンパイル時間・サイズ計測: The Rust Performance Book "Compile Times"、corrode.dev "Tips For Faster Rust Compile Times"（`cargo tree --duplicate` / `cargo-bloat --time` / `cargo-udeps`）。
-- 未検証: 本記事のコード片はコンパイル未確認（環境のネットワーク制約で rustup 取得不可）。`equivalent` 等の「厳密に依存ゼロか」、小 N で `Vec` が `HashMap` より速くなる閾値は手元での実測を推奨。
+- 挿入順の走査だけなら `Vec<(K, V)>`、`O(1)` 参照と順序維持削除の両立が必要なら `indexmap` を選ぶ。
+- 依存コストの判断はまず `cargo tree -i indexmap` で既に依存グラフに入っているかを確認し、新規追加になる場合は `cargo build --timings` と `cargo bloat` で実測する。
+
+## 参考
+
+- [indexmap - Rust Documentation（docs.rs）](https://docs.rs/indexmap/latest/indexmap/)
+- [indexmap RELEASES.md（GitHub）](https://github.com/indexmap-rs/indexmap/blob/main/RELEASES.md)
+- [Compile Times | The Rust Performance Book](https://nnethercote.github.io/perf-book/compile-times.html)
+- [Tips For Faster Rust Compile Times | corrode Rust Consulting](https://corrode.dev/blog/tips-for-faster-rust-compile-times/)
