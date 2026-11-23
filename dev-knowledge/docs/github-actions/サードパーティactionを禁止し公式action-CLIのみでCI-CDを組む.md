@@ -47,5 +47,14 @@ tags: [github-actions, ci-cd, security, supply-chain, actions, pinning]
 ### 判断の指針
 
 - 「その action でしかできないか？」をまず疑う。CLI で置換できるならその方が信頼境界が狭い。
-- 公式 (`actions/*`) → 準公式（`pnpm/action-setup` 等、例外として明示） → CLI 直実行、の優先順で選ぶ。
-- サードパーティ action は原則禁止。使うなら理由を残し、SHA でピン止めする。
+- **CLI 直実行 / 公式 action（`actions/*`）→ 準公式 action（`pnpm/action-setup` 等、例外として明示）** の優先順で選ぶ。
+- サードパーティ action は原則禁止。やむを得ず使うなら理由を残し、必ず commit SHA でピン止めする。
+
+## まとめ
+
+- CI/CD のサプライチェーンリスクを抑えるには、サードパーティ action を禁止し、CLI 直実行と公式 action（`actions/*`）を基本とする。
+- 例外的な準公式 action を含め、すべての `uses:` を commit SHA でピン止めしてタグ差し替えを防ぐ。
+
+## 参考
+
+- [Security hardening for GitHub Actions – GitHub Docs](https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions)

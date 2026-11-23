@@ -1,6 +1,6 @@
 ---
 title: From実装の「型への紐づき」と「クレート依存の向き」は別物 — 外部DTO→ドメイン変換をどこに置くか
-tags: [rust, orphan-rule, coherence, from-trait, into-trait, clean-architecture, ddd, acl, dependency-direction, clippy, from_over_into]
+tags: [rust, orphan-rule, coherence, from-trait, into-trait, clean-architecture, ddd, acl, dependency-direction, clippy, from-over-into]
 ---
 
 ## TL;DR
@@ -149,9 +149,14 @@ API Guidelines は「2つの型のうち、より specific（不変条件や解�
 - 結論: **`From`（失敗するなら `TryFrom`）を api-client 側に置く**のが、孤児ルール・依存方向・Clippy の三拍子をクリアする。
 - 専用の acl 層に置きたい場合、トレイト impl は全型が他クレートで孤児ルールに阻まれるため、**ただの変換関数** `fn to_domain_user(api: ApiUser) -> Result<User, _>` にする。
 
-## まとめ・参考
+## まとめ
 
-- 一行まとめ: 「trait impl は型に**紐づく**が、依存は impl の**置き場所**が背負う。型定義から impl を切り離せるのが Rust と C++ の決定的な差」。
+- trait impl は型に**紐づく**が、依存は impl の**置き場所**が背負う。型定義から impl を切り離せるのが Rust と C++ の決定的な差。
 - `User::from(api)` と呼べることは依存逆流の証拠にならない（`String::from(&str)` でも `str` は `String` に依存しない、と同じ構造）。
-- 参考: RFC 2451 (re-rebalancing coherence), E0117 / E0210, Clippy `from_over_into`, Effective Rust Item 5, Rust API Guidelines (C-CONV-SPECIFIC / Predictability: `from_` より `to_`/`as_`/`into_` を推奨)。
-- 未検証: 本記事のコンパイル確認は環境のネットワーク制約（rustup 取得不可）で未実施。手元 or Rust Playground で `cargo build -p domain` が api-client 非依存で通ることを確認推奨。
+
+## 参考
+
+- [RFC 2451: Re-Rebalancing Coherence](https://rust-lang.github.io/rfcs/2451-re-rebalancing-coherence.html)
+- [Clippy `from_over_into`](https://rust-lang.github.io/rust-clippy/master/index.html#from_over_into)
+- [Effective Rust - Item 5: Prefer `From` over `Into`](https://www.lurklurk.org/effective-rust/casts.html)
+- [Rust API Guidelines - Naming (C-CONV-SPECIFIC)](https://rust-lang.github.io/api-guidelines/naming.html)

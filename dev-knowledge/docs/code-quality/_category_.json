@@ -1,0 +1,7 @@
+{
+  "label": "Code Quality",
+  "link": {
+    "type": "generated-index",
+    "description": "コード品質・可読性・Linter 設計に関する知見。"
+  }
+}

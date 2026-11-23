@@ -1,5 +1,5 @@
 ---
-title: "List → Item 構造での削除確認 state は List 側に `target: Item | null` で持つ"
+title: "List → Item 構造での削除確認 state は List 側に target: Item | null で持つ"
 tags: [react, state-management, list-pattern, dialog, ui-pattern, state-structure]
 ---
 
@@ -25,7 +25,7 @@ React 公式ドキュメント「Choosing the State Structure」が挙げる原�
 > - **Avoid redundant state.** If you can calculate some information from the component's props or its existing state variables during rendering, you should not put that information into that component's state.
 > - **Choose your state variables carefully to avoid creating "impossible" states.**
 
-削除確認 UI の `isOpen` と `targetItem` を別々に持つのは、上の (1)(2)(4) すべてに反する。「常に一緒に更新される」「`isOpen=true && targetItem=null` という不整合状態が表現できる」「`targetItem !== null` から `isOpen` が計算できる」。
+削除確認 UI の `isOpen` と `targetItem` を別々に持つのは、上の原則（関連状態の統合・矛盾の回避・冗長状態の排除・不可能な状態の排除）すべてに反する。「常に一緒に更新される」「`isOpen=true && targetItem=null` という不整合状態が表現できる」「`targetItem !== null` から `isOpen` が計算できる」。
 
 → **1 つの `target: Item | null` にまとめるのが原則どおりの設計**。
 
@@ -294,7 +294,6 @@ state を Provider 等に昇格する判断は「再利用範囲が広がった�
 ## Item 側に置くべきケース（少数派）
 
 - リスト要素ごとに削除ダイアログの内容が**構造的に違う**（フォームを出す、子要素一覧を出す、など Item 固有の文脈が大きい）
-- 仮想スクロールで Item がアンマウントされても Dialog を残したい → これはむしろ List or Provider に上げる動機
 
 ## List 保持 vs Provider 昇格の境界
 
@@ -302,11 +301,12 @@ state を Provider 等に昇格する判断は「再利用範囲が広がった�
 
 - ページ内の List が 1 つ、削除も List 由来
 
-**Provider に上げる動機**:
+**Provider / List 側へ上げるべき動機**:
 
 - 同ページに削除可能な独立リストが複数ある
 - List 以外（詳細画面、ヘッダーメニュー）からも削除を起動する
 - 削除以外の確認ダイアログも共通化したい（汎用 `useConfirm`）
+- 仮想スクロールで Item がアンマウントされても Dialog を残したい（Item 側に置くと一緒に消えてしまうため、List または Provider 側で持つ必要がある）
 
 これらに当てはまらないなら Provider は overkill。**List ローカルの `useState<Item | null>` で始めて、必要になったら昇格**で良い。
 
@@ -319,8 +319,8 @@ state を Provider 等に昇格する判断は「再利用範囲が広がった�
 
 ## 参考
 
-- React 公式「Choosing the State Structure」: https://react.dev/learn/choosing-the-state-structure
-- React 公式「Sharing State Between Components」: https://react.dev/learn/sharing-state-between-components
-- React 公式「Managing State」: https://react.dev/learn/managing-state
-- Kent C. Dodds「State Colocation will make your React app faster」: https://kentcdodds.com/blog/state-colocation-will-make-your-react-app-faster
-- Kent C. Dodds「Application State Management with React」: https://kentcdodds.com/blog/application-state-management-with-react
+- [React 公式「Choosing the State Structure」](https://react.dev/learn/choosing-the-state-structure)
+- [React 公式「Sharing State Between Components」](https://react.dev/learn/sharing-state-between-components)
+- [React 公式「Managing State」](https://react.dev/learn/managing-state)
+- [Kent C. Dodds「State Colocation will make your React app faster」](https://kentcdodds.com/blog/state-colocation-will-make-your-react-app-faster)
+- [Kent C. Dodds「Application State Management with React」](https://kentcdodds.com/blog/application-state-management-with-react)

@@ -1,12 +1,12 @@
 ---
-title: 結末・分岐を表す enum の命名 — `Result` サフィックスと汎用サフィックスを避け、概念名そのものを使う
+title: 結末・分岐を表す enum の命名 — Result サフィックスと汎用サフィックスを避け、概念名そのものを使う
 tags: [rust, naming, enum, api-design, result, naming-convention, std]
 ---
 
 ## TL;DR
 
-- 自前の型に `~Result` を付けるのは、**`std::result::Result` のエイリアス**に限ってイディオマティック（例: `io::Result`, `fmt::Result`）。
-- 「成功/失敗」を意味しない「処理の結末」や「分岐の判定」を表す enum には、`~Result` を付けない。Rust では `Result` という単語は強く `Result` を連想させるため、混乱の元になる。
+- 自前の型に `~Result` を付けるのは、**`std::result::Result<T, E>` のエイリアス**に限ってイディオマティック（例: `io::Result`, `fmt::Result`）。
+- 「成功/失敗」を意味しない「処理の結末」や「分岐の判定」を表す enum には、`~Result` を付けない。Rust では `Result` という単語は強く `std::result::Result<T, E>` を連想させるため、混乱の元になる。
 - 代わりに `~Outcome` / `~Decision` / `~Status` のような汎用サフィックスも避け、**std スタイル：その enum が「何であるか」を表す概念名そのもの**を型名にする（`ControlFlow`, `Cow`, `Entry`, `Ordering`, `Poll`）。
 
 ## このドキュメントの射程
@@ -15,7 +15,7 @@ tags: [rust, naming, enum, api-design, result, naming-convention, std]
 
 - 関数の戻り値が「処理が成功して X した / 何もしなかった / スキップした」のような複数の結末を持つとき
 - enum で「次に何をするか」「どう分岐するか」を呼び出し側に伝えたいとき
-- `bool` では情報が足りないが、`Result` でもない（失敗の概念が無い）とき
+- `bool` では情報が足りないが、`Result<T, E>` でもない（失敗の概念が無い）とき
 
 ## 原因 — なぜ `Result` サフィックスがミスリーディングか
 
@@ -25,13 +25,13 @@ tags: [rust, naming, enum, api-design, result, naming-convention, std]
 
 つまり Rust では `~Result` という名前は **`std::result::Result` のエイリアスである** という強い慣習に縛られている。それ以外の意味で使うと、API を読む人が誤解する。
 
-実際、標準ライブラリで `Result` と名の付く型は **すべて `Result` の特殊化**になっている:
+実際、標準ライブラリで `Result` と名の付く型は **すべて `Result<T, E>` の特殊化**になっている:
 
 | 型 | 実体 |
 |---|---|
-| `std::io::Result` | `Result` |
+| `std::io::Result<T>` | `Result<T, io::Error>` |
 | `std::fmt::Result` | `Result<(), fmt::Error>` |
-| `std::thread::Result` | `Result` |
+| `std::thread::Result<T>` | `Result<T, Box<dyn Any + Send + 'static>>` |
 
 ## 解決 — std スタイル：概念名そのものを型名にする
 
@@ -41,7 +41,7 @@ std ライブラリは「処理の分岐・状態を表す enum」に対して�
 |---|---|---|
 | `std::ops::ControlFlow` | `Continue(C)` / `Break(B)` | 処理を続けるか抜けるか |
 | `std::borrow::Cow<'a, B>` | `Borrowed(&B)` / `Owned(B::Owned)` | 借用のままか所有するか |
-| `std::collections::hash_map::Entry` | `Occupied(...)` / `Vacant(...)` | エントリが埋まってるか空か |
+| `std::collections::hash_map::Entry` | `Occupied(...)` / `Vacant(...)` | エントリが埋まっているか空か |
 | `std::cmp::Ordering` | `Less` / `Equal` / `Greater` | 比較の関係 |
 | `std::task::Poll` | `Ready(T)` / `Pending` | poll の状態 |
 
@@ -55,8 +55,8 @@ std ライブラリは「処理の分岐・状態を表す enum」に対して�
 
 ある型を作るとき:
 
-1. それは「失敗しうる処理の戻り値」を表す `Result` のエイリアスか？
-   - **Yes**: `FooResult` または `type Result = ...` でモジュール内 `Result` として定義 ✅
+1. それは「失敗しうる処理の戻り値」を表す `Result<T, E>` のエイリアスか？
+   - **Yes**: `FooResult` または `type Result<T> = std::result::Result<T, MyError>;` でモジュール内 `Result` として定義 ✅
 2. それは「成功時に複数の値を持つ構造体」か（失敗は別途 `Result` で表現）？
    - `Foo` 自体に `Result` は付けない。`FooOutput`, `FooReport`, または単に `Foo` 等、内容を表す名詞 ✅
 3. それは「処理の分岐・判定を表す enum」か？

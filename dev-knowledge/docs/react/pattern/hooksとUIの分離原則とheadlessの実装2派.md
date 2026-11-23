@@ -5,8 +5,8 @@ tags: [react, headless-ui, custom-hooks, design-principle, separation-of-concern
 
 ## TL;DR
 
-- "headless" は **「振る舞い・状態管理・アクセシビリティはライブラリ、見た目（markup と styling）は利用者」**という設計方針。実装機構には 2 派ある
-- **A 派: 非装飾コンポーネント**（Radix UI / Tailwind Labs Headless UI / Ariakit など）— `` 等のコンポーネントを提供、styling は利用者
+- "headless" は「**振る舞い・状態管理・アクセシビリティはライブラリ、見た目（markup と styling）は利用者**」という設計方針。実装機構には 2 派ある
+- **A 派: 非装飾コンポーネント**（Radix UI / Tailwind Labs Headless UI / Ariakit など）— `<AlertDialog.Root>` 等のコンポーネントを提供、styling は利用者
 - **B 派: props 返し hook**（React Aria / TanStack Table / React Hook Form / Downshift など）— `useCheckbox` 等が `inputProps` 等を返し、JSX は利用者が組む
 - どちらも「JSX を hook の戻り値に内包しない」点で render hooks（hook が JSX を返す）と対極
 
@@ -167,7 +167,7 @@ export function App() {
 }
 ```
 
-`useCheckbox` は `{ inputProps, ... }` を返すだけ。`` を書くのも `` で囲むのも `` で隠して SVG で自前のチェックボックスを描くのも、全て利用者の責任。
+`useCheckbox` は `{ inputProps, ... }` を返すだけ。`<input>` を書くのも `<label>` で囲むのも `<VisuallyHidden>` で隠して SVG で自前のチェックボックスを描くのも、全て利用者の責任。
 
 ### TanStack Table の例
 
@@ -245,7 +245,7 @@ export function PersonTable() {
 }
 ```
 
-`useReactTable` は `table` インスタンスを返す。`<table>` を書くのも `flexRender` で渡すのも利用者。`flexRender` は内部的に「columnDef.header が関数なら `` で呼び、そうでなければ値を返す」という分岐をしている（ソース確認済み）。
+`useReactTable` は `table` インスタンスを返す。`<table>` を書くのも `flexRender` で渡すのも利用者。`flexRender` は内部的に「columnDef.header が関数なら `<Comp {...props} />` で呼び、そうでなければ値を返す」という分岐をしている（ソース確認済み）。
 
 ### React Hook Form の例
 
@@ -311,14 +311,14 @@ export function LoginForm() {
 
 ## 凝集性 vs 再利用性のトレードオフ
 
-UI を内包した hook（render hooks）と、頭がない hook（headless）の対比:
+UI を内包した hook（render hooks）と、UI を持たない hook（headless）の対比:
 
 | | 凝集性 | UI からの分離 | ロジック再利用 |
 |---|---|---|---|
 | render hooks（`useCheckbox` が JSX 返す） | ◎ | ✗ | ✗ |
 | headless（`useCheckbox` が props 返す） | △ | ◎ | ◎ |
 
-具体例で示す。`useFormField` 型の純粋ロジック hook なら、同じロジックを `` でも `` でも `` でも使い回せる:
+具体例で示す。`useFormField` 型の純粋ロジック hook なら、同じロジックを `<input>` でも MUI の `<TextField>` でも自前コンポーネントでも使い回せる:
 
 ```tsx
 // useFormField.ts — UI を知らないロジック hook
@@ -382,7 +382,7 @@ function MuiEmailInput() {
 }
 ```
 
-逆に `useCheckbox` が `` を返すように作られていたら、MUI Checkbox では使えない、自社 DS では使えない。
+逆に `useCheckbox` が `<input type="checkbox" />` を返すように作られていたら、MUI Checkbox では使えない、自社 DS では使えない。
 
 ## 内部実装としては許容できる
 
@@ -454,13 +454,13 @@ devstation の記事「Why You Shouldn't Put JSX in Custom React Hooks」が代�
 
 ## 参考
 
-- React Aria: https://react-spectrum.adobe.com/react-aria/
-- React Aria useCheckbox: https://react-spectrum.adobe.com/react-aria/useCheckbox.html
-- TanStack Table: https://tanstack.com/table/latest
-- TanStack Table flexRender 実装: https://github.com/TanStack/table/blob/main/packages/react-table/src/index.tsx
-- Headless UI (Tailwind Labs): https://headlessui.com/
-- Headless UI v2.0 リリース（React Aria 採用）: https://tailwindcss.com/blog/headless-ui-v2
-- Radix UI Primitives: https://www.radix-ui.com/primitives
-- React Hook Form: https://react-hook-form.com/
-- Downshift: https://www.downshift-js.com/
-- devstation「Why You Shouldn't Put JSX in Custom React Hooks」: https://devstation.hashnode.dev/why-you-shouldnt-put-jsx-in-custom-react-hooks
+- [React Aria](https://react-spectrum.adobe.com/react-aria/)
+- [React Aria useCheckbox](https://react-spectrum.adobe.com/react-aria/useCheckbox.html)
+- [TanStack Table](https://tanstack.com/table/latest)
+- [TanStack Table flexRender 実装](https://github.com/TanStack/table/blob/main/packages/react-table/src/index.tsx)
+- [Headless UI (Tailwind Labs)](https://headlessui.com/)
+- [Headless UI v2.0 リリース（React Aria 採用）](https://tailwindcss.com/blog/headless-ui-v2)
+- [Radix UI Primitives](https://www.radix-ui.com/primitives)
+- [React Hook Form](https://react-hook-form.com/)
+- [Downshift](https://www.downshift-js.com/)
+- [devstation「Why You Shouldn't Put JSX in Custom React Hooks」](https://devstation.hashnode.dev/why-you-shouldnt-put-jsx-in-custom-react-hooks)

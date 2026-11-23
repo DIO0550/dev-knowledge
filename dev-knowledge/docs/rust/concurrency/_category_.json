@@ -1,0 +1,7 @@
+{
+  "label": "Concurrency",
+  "link": {
+    "type": "generated-index",
+    "description": "Rust の非同期処理（async/await・Pin・Send・Mutex）に関する知見。"
+  }
+}

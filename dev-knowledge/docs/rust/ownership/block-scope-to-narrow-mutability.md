@@ -1,11 +1,11 @@
 ---
 title: Rust で mutable な変数の影響範囲をブロックスコープで狭めるのは正しいか
-tags: [rust, ownership, mutability, mut, scope, block-expression, drop, nesting, borrow-checker, nll, shadowing, clippy, builder, pdf_writer, idiom]
+tags: [rust, ownership, mutability, mut, scope, block-expression, drop, nesting, borrow-checker, nll, shadowing, clippy, builder, pdf-writer, idiom]
 ---
 
 ## TL;DR
 
-- 「可変性・変数の影響範囲を狭めたい」動機は正しい。だが **Rust は「フラット（浅いネスト）」を価値として推奨**しており、そのためだけにブロックでネストを増やすのは**第一選択ではない**。質問者の「ブロックは無しよりでは？」という直感はおおむね正しい。
+- 「可変性・変数の影響範囲を狭めたい」動機は正しい。だが **Rust は「フラット（浅いネスト）」を価値として推奨**しており、そのためだけにブロックでネストを増やすのは**第一選択ではない**。「可変範囲を狭めるためだけのブロックは避けるべきか」という疑問への答えはおおむね Yes。
 - 目的別のフラットな代替を先に検討する:
   - **借用を切りたいだけ** → 何もしない（NLL が最後の使用で借用を終わらせる）
   - **以降 immutable にしたい** → シャドーイング `let b = b;`（mut→非mut なので Clippy に怒られない）
@@ -30,7 +30,7 @@ fn a() {
 
 ## 前提: Rust は「フラット（浅いネスト）」を価値として推奨している
 
-質問の核心はここ。Rust 公式は、ネストを浅く保つことを明確に良しとしており、そのための言語機能まで用意している。
+判断の核心はここ。Rust 公式は、ネストを浅く保つことを明確に良しとしており、そのための言語機能まで用意している。
 
 - **`?` 演算子 / `let-else` / early-return** はいずれも「ネスト（rightward drift＝右に流れていくインデント）を減らす」ための機能。`let-else` の RFC は、`if let` が「本体内でしか束縛を作れず、rightward drift を強制し過剰なネストを招く」ことを動機に挙げている（RFC 3137）。The Book も `let...else` を「happy path に留まれる」書き方として推す。
 - **Clippy `excessive_nesting`**（`complexity` グループ・warn-by-default）はネストの深さそのものを問題視する公式 lint で、Why bad に「可読性を著しく損なう」と書かれ、対処として「関数へ抽出」を勧める。
@@ -103,7 +103,7 @@ write_resources(&mut xform);
 xform.bbox(rect);   // この後ふつうに xform を使える
 ```
 
-利点は「呼び出し側がフラット（ネストが増えない）」「処理に名前がつく」「テスト・再利用しやすい」。前述の pdf_writer の例も、ブロックの代わりにこの抽出で書ける。
+利点は「呼び出し側がフラット（ネストが増えない）」「処理に名前がつく」「テスト・再利用しやすい」。後述の `pdf_writer` の例も、ブロックの代わりにこの抽出で書ける。
 
 **注意1（最重要）: 借用を持つ writer / ガードを return しない。** 所有値だけ返すこと。借用を内包する値を返すと、借用が呼び出し側まで延びて結局解放できない（Mutex のガードを返す関数と同じアンチパターン）。
 
@@ -140,7 +140,7 @@ let headers = {
 
 ### (2) `drop()` で表現しづらい一括解放・名前隠し
 
-`drop(a); drop(b); drop(c);` と並べるより、**複数の中間変数をまとめてスコープ外に追い出したい**、あるいは**中間変数名を後続コードに漏らしたくない**ときは、ブロックのほうが意図が明確になりうる。Rust by Example も「ブロック `{}` で変数の lifetime を限定できる」用法を正当なものとして例示している。質問のコードがこの性格（複数の作業変数を `b` 周辺で完結させたい）なら、ブロックは妥当な選択。
+`drop(a); drop(b); drop(c);` と並べるより、**複数の中間変数をまとめてスコープ外に追い出したい**、あるいは**中間変数名を後続コードに漏らしたくない**ときは、ブロックのほうが意図が明確になりうる。Rust by Example も「ブロック `{}` で変数の lifetime を限定できる」用法を正当なものとして例示している。複数の作業変数を `b` 周辺で完結させたい性格のコードなら、ブロックは妥当な選択になる。
 
 ### 実例: `pdf_writer` の builder（Drop 副作用 + 排他借用）
 
@@ -209,7 +209,7 @@ res.finish();   // 辞書を閉じ、借用を解放（ブロックと同じ効�
 
 ## まとめ
 
-- 結論はフラット第一。Rust は浅いネストを良しとし（`?`/`let-else`/early-return、`excessive_nesting`）、可変変数を狭めるだけなら **シャドーイング `let b = b;` / `drop(b);` / 何もしない（NLL）** といったフラットな手段が先に来る。質問者の「ブロックは無しより」という感覚は妥当。
+- 結論はフラット第一。Rust は浅いネストを良しとし（`?`/`let-else`/early-return、`excessive_nesting`）、可変変数を狭めるだけなら **シャドーイング `let b = b;` / `drop(b);` / 何もしない（NLL）** といったフラットな手段が先に来る。単なる可変範囲の限定でブロックを避ける直感は妥当。
 - ブロックがネストの元を取れるのは **値を返す（build-then-freeze）** ときと、**`drop()` で書きづらい複数変数の一括解放・名前隠し** のとき。
 - **関数抽出も有力なフラット代替**。関数の境界がスコープになり、中の所有値は return で drop される。処理に名前がつく・再利用するなら最有力。ただし「借用を持つ値を返さない」「引数爆発させない」の2点に注意。
 - 迷ったら「このブロックは値を返すか？返さないなら、`drop()`／シャドーイング／関数抽出／NLL で平らにできないか？ できないだけの理由（複数変数の一括解放等）があるか？」を順に確認する。
@@ -217,22 +217,22 @@ res.finish();   // 辞書を閉じ、借用を解放（ブロックと同じ効�
 ## 参考
 
 一次情報:
-- The Book ch.6-3 `if let` / `let...else`（happy path・ネスト削減）: https://doc.rust-lang.org/book/ch06-03-if-let.html
-- RFC 3137 let-else（rightward drift・過剰ネストが動機）: https://rust-lang.github.io/rfcs/3137-let-else.html
-- Rust by Example: Early returns（rightward shift 削減）: https://doc.rust-lang.org/rust-by-example/error/result/early_returns.html
-- Rust by Example: Scope（ブロックで変数の lifetime を限定）: https://doc.rust-lang.org/rust-by-example/variable_bindings/scope.html
-- Clippy `excessive_nesting`（complexity・閾値設定でオプトイン）: https://rust-lang.github.io/rust-clippy/master/index.html#excessive_nesting
-- Clippy lint configuration（`excessive-nesting-threshold`, default 0）: https://doc.rust-lang.org/clippy/lint_configuration.html
-- `std::mem::drop`（早期解放の正規手段・RefCell 例）: https://doc.rust-lang.org/std/mem/fn.drop.html
-- Clippy `redundant_locals`（`let x = x;`・mutability 違いは除外）: https://rust-lang.github.io/rust-clippy/master/index.html#redundant_locals
-- redundant_locals 実装・PR（mut→非mut の freeze は対象外、drop order はレキシカル）: https://github.com/rust-lang/rust-clippy/pull/10885
-- RFC 2094 Non-Lexical Lifetimes（借用を切るブロックは「人工的」）: https://rust-lang.github.io/rfcs/2094-nll.html
-- Rust Blog: NLL fully stable（借用は早く終わりうる。NLL は借用のみ）: https://blog.rust-lang.org/2022/08/05/nll-by-default/
-- The Book ch.3-1 Variables and Mutability（デフォルト immutable / `mut` は意図表明）: https://doc.rust-lang.org/book/ch03-01-variables-and-mutability.html
+- [The Book ch.6-3 `if let` / `let...else`（happy path・ネスト削減）](https://doc.rust-lang.org/book/ch06-03-if-let.html)
+- [RFC 3137 let-else（rightward drift・過剰ネストが動機）](https://rust-lang.github.io/rfcs/3137-let-else.html)
+- [Rust by Example: Early returns（rightward shift 削減）](https://doc.rust-lang.org/rust-by-example/error/result/early_returns.html)
+- [Rust by Example: Scope（ブロックで変数の lifetime を限定）](https://doc.rust-lang.org/rust-by-example/variable_bindings/scope.html)
+- [Clippy `excessive_nesting`（complexity・閾値設定でオプトイン）](https://rust-lang.github.io/rust-clippy/master/index.html#excessive_nesting)
+- [Clippy lint configuration（`excessive-nesting-threshold`, default 0）](https://doc.rust-lang.org/clippy/lint_configuration.html)
+- [`std::mem::drop`（早期解放の正規手段・RefCell 例）](https://doc.rust-lang.org/std/mem/fn.drop.html)
+- [Clippy `redundant_locals`（`let x = x;`・mutability 違いは除外）](https://rust-lang.github.io/rust-clippy/master/index.html#redundant_locals)
+- [redundant_locals 実装・PR（mut→非mut の freeze は対象外、drop order はレキシカル）](https://github.com/rust-lang/rust-clippy/pull/10885)
+- [RFC 2094 Non-Lexical Lifetimes（借用を切るブロックは「人工的」）](https://rust-lang.github.io/rfcs/2094-nll.html)
+- [Rust Blog: NLL fully stable（借用は早く終わりうる。NLL は借用のみ）](https://blog.rust-lang.org/2022/08/05/nll-by-default/)
+- [The Book ch.3-1 Variables and Mutability（デフォルト immutable / `mut` は意図表明）](https://doc.rust-lang.org/book/ch03-01-variables-and-mutability.html)
 
-- pdf_writer `Chunk`（`form_xobject` シグネチャ）: https://docs.rs/pdf_writer/latest/pdf_writer/struct.Chunk.html
-- pdf_writer `FormXObject`（`resources` シグネチャ）: https://docs.rs/pdf_writer/latest/pdf_writer/writers/struct.FormXObject.html
-- pdf_writer ソース（`Dict` の `Drop`・`Finish`・手動 drop の注意書き）: https://github.com/typst/pdf-writer/blob/main/src/object.rs
+- [pdf_writer `Chunk`（`form_xobject` シグネチャ）](https://docs.rs/pdf_writer/latest/pdf_writer/struct.Chunk.html)
+- [pdf_writer `FormXObject`（`resources` シグネチャ）](https://docs.rs/pdf_writer/latest/pdf_writer/writers/struct.FormXObject.html)
+- [pdf_writer ソース（`Dict` の `Drop`・`Finish`・手動 drop の注意書き）](https://github.com/typst/pdf-writer/blob/main/src/object.rs)
 
 二次情報:
-- The block pattern / initialize-and-freeze: https://notgull.net/block-pattern/
+- [The block pattern / initialize-and-freeze](https://notgull.net/block-pattern/)
