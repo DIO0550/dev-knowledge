@@ -1,28 +1,26 @@
 ---
-title: else を排除する早期 return（guard clause）と命令的 for を宣言的イテレータチェーンに
-tags: [rust, coding-style, guard-clause, early-return, iterator, declarative, control-flow]
+title: else を排除する早期 return（guard clause）と宣言的イテレータチェーンの使い分け
+tags: [rust, control-flow, early-return, guard-clause, iterator, coding-style]
 ---
 
 ## TL;DR
 
-- `else` を使うと本処理が分岐のネストの奥に押し込まれる。**前提を満たさないケースを先に `return` で弾く（guard clause）**と、本処理がトップレベルに残り読みやすい。
-- `for` ループで `push` していく命令的パターンは、**`.iter().filter().map().collect()` の宣言的チェーン**に置き換えると「何をしたいか」が式で表せる。
-- どちらも「正常系を主役に、逸脱系を先に処理する」という同じ発想。
+- `else` を重ねると本処理がネストの奥に押し込まれる。**前提を満たさないケースを先に `return` で弾く**（guard clause）ことで、正常系をトップレベルに残せる。
+- `for` ループで `Vec` に `push` していく命令的な集計・変換は、**`.iter().filter().map().collect()` の宣言的チェーン**に置き換えると意図がそのまま式として読める。
+- どちらも「正常系を主役に据え、手続きではなく意図を表す」ための指針だが、対称な 2 分岐や副作用が主目的のループには無理に適用しない。
 
-## 問題
+## 背景・射程
 
-PR レビューで、不要な `if-else` が多くネストが深いコードと、`for` ループを命令的に回すコードが目立った。
+Rust の制御フローやコレクション処理では、不要な `if-else` による深いネストや、可変 `Vec` を使った命令的な `for` ループがコードの見通しを悪くしやすい。
 
-## 原因
+- 対象：`Option` / `Result` や前提条件のチェックを伴う関数、およびコレクションの変換・抽出処理。
+- 環境：`let ... else` 構文は Rust 1.65（2022-11）で安定化。それ以前のツールチェインでは `match` や `if let` による早期 `return` を使う。
 
-- **`else` を使うと分岐のネストが深くなる。** 本来の処理（正常系）が `if` のブロックの奥に入り、前提チェックと本処理が視覚的に混ざる。
-- **`for` の命令的パターンも同様。** 「空の `Vec` を用意 → ループで条件判定 → `push`」という手続きは、可変状態とループ本体を読み手が頭の中で実行しないと意図が掴めない。
+## 判断軸・比較
 
-## 解決
+### 1. `if-else` のネスト vs 早期 return（guard clause）
 
-### 1. `else` 排除 + 早期 return（guard clause）
-
-前提を満たさない条件を先頭で `return` して弾き、以降は正常系だけを一直線に書く。
+`else` を使うと分岐のネストが深くなり、前提チェックと本来の処理（正常系）が視覚的に混ざる。前提を満たさない条件を先頭で `return` して弾けば、以降は正常系だけを一直線に書ける。
 
 ```rust
 // NG: else でネストが深くなり、本処理が奥に入る
@@ -53,10 +51,12 @@ fn summarize(user: Option<&User>) -> Result<Summary, Error> {
 }
 ```
 
-- `let ... else { return; }`（let-else 構文）は「束縛に失敗したら早期脱出」を素直に書ける。パターンが合わなければ `else` ブロックへ入り、そこは必ず発散（`return` / `break` / `continue` / `panic!` 等）する必要がある。
-- 早期 return が並ぶことで「この関数が受け付けない条件」が先頭に列挙され、契約がドキュメントのように読める。
+- `let ... else { return ...; }` は「パターン束縛に失敗したら早期脱出する」意図をそのまま書ける。`else` ブロックは必ず発散（`return` / `break` / `continue` / `panic!` 等）する必要がある。
+- 早期 `return` が先頭に並ぶことで、その関数が受け付けない前提条件が仕様のように読める。
 
-### 2. 命令的 `for` を宣言的イテレータチェーンに
+### 2. 命令的 `for` ループ vs 宣言的イテレータチェーン
+
+「空の `Vec` を用意 → ループで条件判定 → `push`」という手続きは、可変状態とループ本体を頭の中で追いかけないと目的が掴めない。
 
 ```rust
 // NG: 可変 Vec + for + push の命令的パターン
@@ -77,15 +77,19 @@ let names: Vec<String> = users
     .collect();
 ```
 
-- 「アクティブなユーザーの名前を大文字にして集める」という**意図がそのまま式**になる。可変状態が消え、型注釈（`Vec<String>`）が結果の形を明示する。
-- 集計・探索・畳み込みもメソッドで表現できる（`sum()` / `find()` / `any()` / `fold()` / `try_for_each()` 等）。
+- 「アクティブなユーザーの名前を大文字にして集める」という**意図がそのまま式**になり、可変状態が消える。型注釈（`Vec<String>`）が結果の形も明示する。
+- 集計・探索・畳み込みも `sum()` / `find()` / `any()` / `fold()` / `try_for_each()` などで簡潔に表現できる。
 
-## 適用しないほうがよいケース（注意）
+## 指針
 
-- **副作用が主目的のループ**（ログ出力・I/O・複雑な分岐を伴う逐次処理）は、無理に `for_each` にせず素直な `for` のままのほうが読みやすいことがある。
-- **途中で早期脱出したい**場合は、`for` + `break` か、`find` / `position` / `any` / `try_for_each`（`ControlFlow` / `Result`）などループを畳む形を選ぶ。`filter().map().collect()` は全要素を走査する点に注意。
-- guard clause も、条件が 2 分岐で対称なら素直な `if/else` のほうが自然なこともある。**ネストが深くなる・正常系が奥に押し込まれるときに効く**指針として使う。
+- **ネストが深くなるとき・前提チェックが続くとき**は `let ... else` や `if !cond { return ...; }` の guard clause を優先する。
+- **変換・抽出・集計が主目的のループ**はイテレータチェーンで書く。
+- ただし、以下のケースでは無理に適用しない。
+  - **条件が 2 分岐で対称なとき**：どちらも等価な分岐なら素直な `if / else` のほうが自然。
+  - **副作用が主目的のループ**：ログ出力・I/O・複雑な状態遷移を伴う逐次処理は、無理に `for_each` にせず `for` のままにする。
+  - **途中で早期脱出したいとき**：`filter().map().collect()` は全要素を走査するため、`for` ＋ `break` や短絡評価するメソッド（`find` / `position` / `any` / `try_for_each`）を選ぶ。
 
-## 環境
+## 参考
 
-- `let ... else` 構文は Rust 1.65（2022-11）で安定化。それ以前のツールチェインでは `match` / `if let` での早期 return に置き換える。
+- [Statements - let-else statements | The Rust Reference](https://doc.rust-lang.org/reference/statements.html#let-else-statements)
+- [Processing a Series of Items with Iterators | The Rust Programming Language](https://doc.rust-lang.org/book/ch13-02-iterators.html)
