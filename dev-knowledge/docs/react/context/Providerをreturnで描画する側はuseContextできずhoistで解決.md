@@ -1,6 +1,6 @@
 ---
 title: Provider を return で描画する側は useContext できない — hoist で中間コンポーネントを消す
-tags: [react, context, provider, architecture, useContext]
+tags: [react, context, provider, architecture, use-context]
 ---
 
 ## TL;DR
@@ -63,7 +63,7 @@ function AppShell() {
 }
 ```
 
-こうすると `AppShell` は Provider の子孫になるため、`AppShellBody` を切り出す理由が消える。結果として中間コンポーネントは完全に不要になった（+358 / −657 の簡素化）。
+こうすると `AppShell` は Provider の子孫になるため、`AppShellBody` を切り出す理由が消える。結果として中間コンポーネントは完全に不要になり、構成が大きく簡素化される。
 
 ## 4. 判断のポイント
 

@@ -1,17 +1,17 @@
 ---
-title: "React: 同一APIリクエストのin-flight dedupはuseRefではなくmodule-scope Mapで"
-tags: [react, typescript, useref, anti-pattern, request-deduplication, in-flight, swr, tanstack-query, module-scope, fetch, custom-hook]
+title: 同一 API リクエストの重複排除（in-flight dedup）は useRef ではなくモジュールスコープの Map で管理する
+tags: [react, typescript, use-ref, anti-pattern, request-deduplication, in-flight, swr, tanstack-query, module-scope, fetch, custom-hooks]
 ---
 
 ## TL;DR
 
-- 「複数componentから同じAPIを同時に叩いたら1本にまとめたい」というdedup要件で、componentの `useRef` にin-flight promiseを持つのはアーキ的に間違い。
-- dedupの所有者はアプリ全体なので、module-scopeの `Map` で持つのが正攻法。SWR / TanStack Query の内部実装も同じ設計。
-- 自前で書くより、実プロダクトではTanStack QueryやSWRを使う。
+- 「複数コンポーネントから同じ API を同時に叩いたら 1 本にまとめたい」という重複排除（dedup）要件で、コンポーネントの `useRef` に進行中 Promise（in-flight Promise）を持つのは設計上誤り。
+- 重複排除の所有者はアプリ全体なので、モジュールスコープの `Map` で持つのが正攻法。SWR / TanStack Query の内部実装も同じ設計。
+- 自前で書くより、実プロダクトでは TanStack Query や SWR を使う。
 
 ## 遭遇した問題
 
-複数のcomponentが同じAPIを叩く構成で、ネットワークリクエストを1本にまとめたい。AIや既存コードがcomponentの `useRef` でin-flight promiseを保持する実装を提案してくる:
+複数のコンポーネントが同じ API を叩く構成で、ネットワークリクエストを 1 本にまとめたい。AI や既存コードがコンポーネントの `useRef` で進行中 Promise を保持する実装を提案してくる:
 
 ```ts
 function useUserProfile(userId: string) {
@@ -33,20 +33,20 @@ function useUserProfile(userId: string) {
 }
 ```
 
-これだと別componentが同じuserIdで `useUserProfile` を呼んでも、それぞれのcomponentにrefがあるため別リクエストが走る。dedupが効かない。
+これだと別コンポーネントが同じ `userId` で `useUserProfile` を呼んでも、それぞれのコンポーネントに `ref` があるため別リクエストが走る。重複排除が効かない。
 
 ## 原因
 
-dedupの所有者を取り違えている。「**アプリ全体で同一keyに対するin-flight promiseは1本**」が実現したい状態だから、所有者はモジュール / アプリレベルであるべき。componentのrefはcomponentインスタンスごとに別物なので、componentを跨いだ共有が原理的にできない。
+重複排除の所有者を取り違えている。「**アプリ全体で同一キーに対する進行中 Promise は 1 本**」が実現したい状態だから、所有者はモジュール / アプリレベルであるべき。コンポーネントの `ref` はコンポーネントインスタンスごとに別物なので、コンポーネントを跨いだ共有が原理的にできない。
 
-「Reactでrender-triggeringしないmutableな値 = useRef」というパターンマッチが強すぎて、Reactのhookに閉じ込めること自体が間違いだと気付きにくい。素のJavaScriptのmodule top-levelに置けばいいだけ。
+「React で再レンダーを起こさない可変値 = `useRef`」という連想が強すぎて、React の hook に閉じ込めること自体が間違いだと気付きにくい。素の JavaScript のモジュールトップレベルに置けばいいだけ。
 
 ## 解決
 
-module-scopeの `Map` でin-flight promiseを管理する。SWRの公式実装でもfetcher応答cacheとin-flight promise cacheの両方をmodule-scopeに持っており、TanStack Queryも `QueryClient` というアプリレベルのシングルトンが `QueryCache` を持つ設計。これがメジャーライブラリ共通の正攻法。
+モジュールスコープの `Map` で進行中 Promise を管理する。SWR の公式実装でも応答キャッシュと進行中 Promise キャッシュの両方をモジュールスコープに持っており、TanStack Query も `QueryClient` というアプリレベルのシングルトンが `QueryCache` を持つ設計。これが主要ライブラリ共通の正攻法。
 
 ```ts
-// userProfileClient.ts ← 純粋なJavaScriptモジュール、Reactと無関係
+// userProfileClient.ts ← 純粋な JavaScript モジュール、React と無関係
 const inflight = new Map<string, Promise<UserProfile>>();
 
 export function fetchUserProfile(userId: string): Promise<UserProfile> {
@@ -68,7 +68,7 @@ export function fetchUserProfile(userId: string): Promise<UserProfile> {
 ```
 
 ```ts
-// useUserProfile.ts ← dedupのことを知らない素直なhook
+// useUserProfile.ts ← 重複排除のことを知らない素直な hook
 export function useUserProfile(userId: string) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
@@ -86,16 +86,16 @@ export function useUserProfile(userId: string) {
 
 利点:
 
-- `fetchUserProfile` は純粋なJS関数。Reactテストランナーに頼らず単体テストできる
-- dedup責務がhookから分離されているのでhookが薄い
-- 複数componentが同じuserIdで呼んでもネットワークリクエストは1本
+- `fetchUserProfile` は純粋な JS 関数。React テストランナーに頼らず単体テストできる
+- 重複排除の責務が hook から分離されているので hook が薄い
+- 複数コンポーネントが同じ `userId` で呼んでもネットワークリクエストは 1 本
 - 完了後 `inflight.delete` で次のリクエストは正常に走る
 
-cache（fresh data再利用）やstale管理まで足すとTanStack Queryの再発明になるので、実プロダクトではライブラリを使う。
+応答キャッシュ（新鮮なデータの再利用）や stale 管理まで足すと TanStack Query の再発明になるので、実プロダクトではライブラリを使う。
 
 ## まとめ
 
-「同じリクエストの共有」はアプリレベルの状態。所有者をモジュールに置けば、useRefに行く理由はそもそも消える。
+「同じリクエストの共有」はアプリレベルの状態。所有者をモジュールに置けば、`useRef` を使う理由はそもそも消える。
 
 ## 参考
 

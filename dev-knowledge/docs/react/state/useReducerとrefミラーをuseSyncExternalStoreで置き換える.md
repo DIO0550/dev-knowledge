@@ -1,6 +1,6 @@
 ---
 title: useReducer + useRef ミラーを useSyncExternalStore で置き換える
-tags: [react, useSyncExternalStore, state-management, external-store, async, useReducer, useRef]
+tags: [react, use-sync-external-store, state-management, external-store, async, use-reducer, use-ref]
 ---
 
 ## TL;DR
@@ -13,6 +13,13 @@ tags: [react, useSyncExternalStore, state-management, external-store, async, use
 
 async command（Tauri `invoke` の `await` 後）や Tauri の `listen` callback が「今の state」を同期的に読みたい。React の `useReducer` の state は closure に閉じるので、`await` を跨ぐと古い値を掴んでしまう。
 
+```tsx
+async function runCommand() {
+  await invoke("do_something");
+  // ここの state は await 前の closure に閉じた古い state
+}
+```
+
 そこで `latestStateRef.current` に手動でミラーし、`dispatchSync` で「reducer 更新」と「ref 更新」を二重に走らせて同期を取っていた。
 
 ```tsx
@@ -23,7 +30,7 @@ function dispatchSync(action: Action) {
 }
 ```
 
-> 補足: 「`useReducer` は reducer が常に最新 state を第 1 引数で受け取るのでスタれない」とよく言われるが、それは **更新（dispatch）側** の話。ここで困っているのは **読み取り側**で、`await` を跨いだ後に「今の state を読んで分岐したい」ケース。この読み取りはコンポーネント関数の closure に閉じた `state` を参照するため古くなる。更新のスタレスと読み取りのスタレスは別問題である（[stale closure の解説](https://dev.to/wildboar_developer/understanding-stale-closure-in-react-a-common-pitfall-and-how-to-avoid-it-5dih)）。
+> 補足: 「`useReducer` は reducer が常に最新 state を第 1 引数で受け取るので古くならない（stale にならない）」とよく言われるが、それは **更新（dispatch）側** の話。ここで困っているのは **読み取り側**で、`await` を跨いだ後に「今の state を読んで分岐したい」ケース。この読み取りはコンポーネント関数の closure に閉じた `state` を参照するため古くなる。更新時の stale 問題と読み取り時の stale 問題は別問題である（[stale closure の解説](https://dev.to/wildboar_developer/understanding-stale-closure-in-react-a-common-pitfall-and-how-to-avoid-it-5dih)）。
 
 ## 原因
 
@@ -74,7 +81,7 @@ const state = useSyncExternalStore(store.subscribe, store.getState);
 
 - 「`await` を跨いで最新 state を読みたい」は React state の closure 特性と本質的に相性が悪い。ref ミラーで対症療法するより、state の在り処を React の外に出すのが構造的な解。
 - state の本体を素の store に置き `useSyncExternalStore` で購読すれば、真実が 1 箇所に集約され、ref ミラー・`dispatchSync`・二重 reducer がまとめて消える。
-- reducer ロジックはそのまま流用できる（store の `dispatch` 内で呼ぶだけ）。React への依存だけが外れる。
+- reducer ロジックはそのまま流用でき、store は React 非依存の素の TypeScript になるため、テストも React 抜きで書ける副産物がある。
 
 ## 参考
 

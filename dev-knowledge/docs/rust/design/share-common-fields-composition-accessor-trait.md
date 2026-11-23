@@ -87,7 +87,7 @@ impl std::ops::Deref for Foo {
 
 ## 参考
 
-- Rust Design Patterns, Anti-patterns: Deref Polymorphism — https://rust-unofficial.github.io/patterns/anti_patterns/deref.html
+- [Rust Design Patterns, Anti-patterns: Deref Polymorphism](https://rust-unofficial.github.io/patterns/anti_patterns/deref.html)
 - Rust API Guidelines, Predictability — Only smart pointers implement Deref and DerefMut (C-DEREF)
-- A Gentle Introduction to Rust, Object-Oriented Programming — https://stevedonovan.github.io/rust-gentle-intro/object-orientation.html
-- users.rust-lang.org, "How to think without field inheritance?" — https://users.rust-lang.org/t/how-to-think-without-field-inheritance/78116
+- [A Gentle Introduction to Rust, Object-Oriented Programming](https://stevedonovan.github.io/rust-gentle-intro/object-orientation.html)
+- [users.rust-lang.org, "How to think without field inheritance?"](https://users.rust-lang.org/t/how-to-think-without-field-inheritance/78116)

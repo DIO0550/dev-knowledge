@@ -1,6 +1,6 @@
 ---
-title: カスタムフックの戻り値を `Object | null` にする設計はReactコミュニティで確立されたパターンではない
-tags: [react, custom-hook, typescript, hook-design, nullable, discriminated-union]
+title: カスタムフックの戻り値を Object | null にする設計はReactコミュニティで確立されたパターンではない
+tags: [react, custom-hooks, typescript, hook-design, nullable, discriminated-union]
 ---
 
 ## TL;DR
@@ -15,10 +15,10 @@ tags: [react, custom-hook, typescript, hook-design, nullable, discriminated-unio
 
 ```ts
 const useUserProfile = (userId: string) => {
-  const [user, setUser] = useState(undefined)
+  const [user, setUser] = useState<User | undefined>(undefined)
   // ...
   if (user == null) { return null }
-  return { /* nullいがいのオブジェクト */ }
+  return { /* null 以外のオブジェクト */ }
 }
 ```
 
@@ -57,7 +57,7 @@ const useAuth = () => {
   return { user, login, logout }  // user: User | null
 }
 
-// 質問のパターン(主流ではない)
+// Object | null を返すパターン（主流ではない）
 const useAuth = () => {
   // ...
   if (!user) return null
@@ -65,7 +65,7 @@ const useAuth = () => {
 }
 ```
 
-主流形なら `login` / `logout` などのアクションはuserがnullでも呼べる。質問のパターンだとnullの間は何のアクションも呼べなくなる。
+主流形なら `login` / `logout` などのアクションは `user` が `null` でも呼べる。戻り値全体を `Object | null` にするパターンだと、`null` の間は何のアクションも呼べなくなる。
 
 ### 4. 公式 `useFriendStatus`
 
@@ -93,7 +93,7 @@ type UseUserProfileResult = {
 }
 
 const useUserProfile = (userId: string): UseUserProfileResult => {
-  const [user, setUser] = useState(undefined)
+  const [user, setUser] = useState<User | undefined>(undefined)
 
   const refetch = useCallback(async () => {
     const result = await fetchUser(userId)
@@ -108,10 +108,10 @@ const useUserProfile = (userId: string): UseUserProfileResult => {
 
 呼び出し側は常に分割代入でき、`user` の有無だけで分岐すればよい。`user` が undefined の間でも `refetch` は呼べる、というのが元のパターンとの本質的な差。
 
-```ts
+```tsx
 const { user, refetch } = useUserProfile(userId)
-if (user === undefined) return
-return
+if (user === undefined) return <Loading />
+return <Profile user={user} onRefresh={refetch} />
 ```
 
 ### (B) discriminated union (状態を型で区別したい時)
@@ -125,7 +125,7 @@ type UserProfileState =
   | { status: 'error'; error: Error }
 
 const useUserProfile = (userId: string) => {
-  const [state, setState] = useState({ status: 'pending' })
+  const [state, setState] = useState<UserProfileState>({ status: 'pending' })
 
   const refetch = useCallback(async () => {
     setState({ status: 'pending' })
@@ -145,12 +145,12 @@ const useUserProfile = (userId: string) => {
 
 呼び出し側では `state.status` で switch すれば exhaustive にチェックでき、状態追加(例えば `empty`)に強い。action は state の分岐から独立しているので、どの状態でも常に呼べる。
 
-```ts
+```tsx
 const { state, refetch } = useUserProfile(userId)
 switch (state.status) {
-  case 'pending': return
-  case 'error':   return
-  case 'ready':   return
+  case 'pending': return <Loading />
+  case 'error':   return <ErrorView error={state.error} onRetry={refetch} />
+  case 'ready':   return <Profile user={state.user} onRefresh={refetch} />
 }
 ```
 
@@ -162,9 +162,9 @@ discriminated union に action を一緒に詰め込む書き方(各バリアン
 
 ## 参考
 
-- React公式ドキュメント(legacy) `useFriendStatus`の例: https://legacy.reactjs.org/docs/hooks-custom.html
-- Kent C. Dodds "Stop using isLoading booleans": https://kentcdodds.com/blog/stop-using-isloading-booleans
-- JulianGaramendy "Why I never use React.useContext"(createStrictContext): https://juliangaramendy.dev/blog/strict-react-context
-- Codeminer42 "You are using React Context WRONG": https://blog.codeminer42.com/you-are-using-react-context-wrong/
-- TkDodo on TanStack Query: https://github.com/TanStack/query/discussions/1331
-- Steve Kinney "Discriminated Unions" in React with TypeScript: https://stevekinney.com/courses/react-typescript/typescript-discriminated-unions
+- [React公式ドキュメント(legacy) `useFriendStatus`の例](https://legacy.reactjs.org/docs/hooks-custom.html)
+- [Kent C. Dodds "Stop using isLoading booleans"](https://kentcdodds.com/blog/stop-using-isloading-booleans)
+- [JulianGaramendy "Why I never use React.useContext"(createStrictContext)](https://juliangaramendy.dev/blog/strict-react-context)
+- [Codeminer42 "You are using React Context WRONG"](https://blog.codeminer42.com/you-are-using-react-context-wrong/)
+- [TkDodo on TanStack Query](https://github.com/TanStack/query/discussions/1331)
+- [Steve Kinney "Discriminated Unions" in React with TypeScript](https://stevekinney.com/courses/react-typescript/typescript-discriminated-unions)

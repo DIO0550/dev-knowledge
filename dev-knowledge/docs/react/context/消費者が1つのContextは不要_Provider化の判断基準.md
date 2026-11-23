@@ -1,6 +1,6 @@
 ---
 title: 消費者が 1 つなら Context 化は不要 — Provider 化の判断基準
-tags: [react, context, useContext, over-engineering, state-management, provider, composition]
+tags: [react, context, use-context, over-engineering, state-management, provider, composition]
 ---
 
 ## TL;DR
@@ -51,7 +51,7 @@ Context が正当化されるのは、値を使う場所が「離れた・別の
 
 ## 3. 解決
 
-Context をやめ、Provider は **App 直下に hoist**、`AppShellBody` の分離は撤去する。state は props / 親コンポーネントで持つ。
+Context と Provider 自体を撤去し、`AppShellBody` の分離もやめる。state は親コンポーネントで持ち、props で渡す。
 
 ```tsx
 function App() {

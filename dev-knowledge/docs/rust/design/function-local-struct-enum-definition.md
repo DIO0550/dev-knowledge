@@ -1,22 +1,6 @@
 ---
 title: Rust で関数内部に struct / enum を定義するのは避けるべきか
-tags:
-  [
-    rust,
-    design,
-    struct,
-    enum,
-    scope,
-    item-declaration,
-    non-local-definitions,
-    rustdoc,
-    rust-analyzer,
-    clippy,
-    coding-style,
-    typescript,
-    go,
-    java,
-  ]
+tags: [rust, design, struct, enum, scope, item-declaration, non-local-definitions, rustdoc, rust-analyzer, clippy, coding-style, typescript, go, java]
 ---
 
 ## TL;DR
@@ -335,4 +319,4 @@ fn setup() {
 - [TypeScript 1.6 Release Notes: Local type declarations](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-1-6.html)
 - [Go spec: Declarations and scope](https://go.dev/ref/spec#Declarations_and_scope) / [golang/go#71562（ローカル型のメソッド定義提案・not planned）](https://github.com/golang/go/issues/71562)
 - [Java: Record Classes（ローカル record）](https://docs.oracle.com/en/java/javase/17/language/records.html)
-- [C++ [class.local]](https://timsong-cpp.github.io/cppwp/n4861/class.local)
+- [C++ `class.local`](https://timsong-cpp.github.io/cppwp/n4861/class.local)

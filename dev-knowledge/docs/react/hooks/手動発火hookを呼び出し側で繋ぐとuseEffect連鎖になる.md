@@ -1,6 +1,6 @@
 ---
 title: 手動発火hookを呼び出し側で順番に繋ぐとuseEffect連鎖（地獄）になる
-tags: [react, hooks, useEffect, data-fetching, anti-pattern, event-handler, promise-all, async-await, design]
+tags: [react, hooks, use-effect, data-fetching, anti-pattern, event-handler, promise-all, async-await, design]
 ---
 
 ## TL;DR
@@ -88,6 +88,6 @@ function useSequentialFlow() {
 
 ## 参考
 
-- React公式「You Might Not Need an Effect」: Effectの連鎖の2つの問題、ロジックはイベント／単一イベント内にまとめる指針。 https://react.dev/learn/you-might-not-need-an-effect
-- React anti-patterns that lead to unnecessary complexity: 相互依存する連鎖Effectが「complexity hell」を生む具体例。 https://letsbuild.cloud/2024-02-22-react-anti-patterns.html
-- An Ode to React Effects (Alex Kondov): 「イベントハンドラがフラグをセット→useEffectが監視→リクエスト発火」がコンポーネント複雑化の元凶という指摘。 https://alexkondov.com/an-ode-to-effects/
+- [React 公式「You Might Not Need an Effect」](https://react.dev/learn/you-might-not-need-an-effect) — Effect の連鎖の 2 つの問題、ロジックはイベント／単一イベント内にまとめる指針
+- [React anti-patterns that lead to unnecessary complexity](https://letsbuild.cloud/2024-02-22-react-anti-patterns.html) — 相互依存する連鎖 Effect が「complexity hell」を生む具体例
+- [An Ode to React Effects (Alex Kondov)](https://alexkondov.com/an-ode-to-effects/) — 「イベントハンドラがフラグをセット→useEffect が監視→リクエスト発火」がコンポーネント複雑化の元凶という指摘

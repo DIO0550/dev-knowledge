@@ -122,7 +122,7 @@ test("create() はコマンドと引数をそのまま invoke に渡す", async 
 
 ## 参考
 
-- James Shore, Testing Without Mocks: A Pattern Language（Nullables / Embedded Stub / Thin Wrapper / Fake It Once You Make It）— https://www.jamesshore.com/v2/projects/nullables/testing-without-mocks
-- testdouble, Don't mock what you don't own — https://github.com/testdouble/contributing-tests/wiki/Don't-mock-what-you-don't-own
-- Google Testing Blog, Don't Mock Types You Don't Own — https://testing.googleblog.com/2020/07/testing-on-toilet-dont-mock-types-you.html
-- Tauri v2, Mock Tauri APIs — https://v2.tauri.app/develop/tests/mocking/
+- [James Shore, Testing Without Mocks: A Pattern Language（Nullables / Embedded Stub / Thin Wrapper / Fake It Once You Make It）](https://www.jamesshore.com/v2/projects/nullables/testing-without-mocks)
+- [testdouble, Don't mock what you don't own](https://github.com/testdouble/contributing-tests/wiki/Don't-mock-what-you-don't-own)
+- [Google Testing Blog, Don't Mock Types You Don't Own](https://testing.googleblog.com/2020/07/testing-on-toilet-dont-mock-types-you.html)
+- [Tauri v2, Mock Tauri APIs](https://v2.tauri.app/develop/tests/mocking/)

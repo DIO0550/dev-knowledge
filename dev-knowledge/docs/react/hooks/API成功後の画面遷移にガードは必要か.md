@@ -1,12 +1,12 @@
 ---
 title: API 成功後の画面遷移にガードは必要か（useEffect / イベントハンドラ別の判断）
-tags: [react, react-router, nextjs, tanstack-query, useEffect, navigation, race-condition, abortcontroller, useRef, custom-hooks]
+tags: [react, react-router, nextjs, tanstack-query, use-effect, navigation, race-condition, abort-controller, use-ref, custom-hooks]
 ---
 
 ## TL;DR
 
 - **ガードは必要**。`navigate()` / `router.push()` は unmount 後でも普通に実行され、「送信中に戻る → 応答が返って再び前に飛ばされる」は実在するバグ。
-- ただし**「ref でガード」が正解になるのは限られたケースだけ**。
+- ただし **「ref でガード」が正解になるのは限られたケースだけ**。
 - `useEffect` 内（GET）→ **ref は誤り**。cleanup + `AbortController` / `ignore` closure 変数。
 - ボタン押下（POST）→ **キャンセルではなく「遷移だけ抑制」が正解**。TanStack Query なら `mutate` 第2引数の `onSuccess` に置くだけで済む。素の fetch のときだけ `isMounted` ref が妥当。
 - React Router Data mode（`<Form>` + action + `redirect()`）ならルーター側が持っているのでアプリ側のガードは不要。

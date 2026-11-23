@@ -1,6 +1,6 @@
 ---
 title: 古典学派でのReact API呼び出しhooksテスト戦略（モック境界とテストケース数）
-tags: [react, testing, hooks, 古典学派, MSW, TanStack-Query, 同値分割, 単体テスト]
+tags: [react, testing, hooks, classicist-testing, msw, tanstack-query, equivalence-partitioning, unit-testing]
 ---
 
 ## TL;DR
@@ -153,7 +153,7 @@ hooksはresultCodeを露出するだけで、コンポーネント側でResultCo
 ## 参考
 
 - Vladimir Khorikov『単体テストの考え方/使い方』（マイナビ出版, 2022）— 古典学派の原則、観察可能な振る舞い vs 実装の詳細
-- TkDodo "Testing React Query" — https://tkdodo.eu/blog/testing-react-query
-- TanStack Query Testing Guide — https://tanstack.com/query/latest/docs/framework/react/guides/testing
-- MSW — https://mswjs.io/
+- [TkDodo "Testing React Query"](https://tkdodo.eu/blog/testing-react-query)
+- [TanStack Query Testing Guide](https://tanstack.com/query/latest/docs/framework/react/guides/testing)
+- [MSW](https://mswjs.io/)
 - 同値分割法・境界値分析 — ブラックボックステスト技法（古典学派固有ではないが、古典学派と自然に組み合わさる）

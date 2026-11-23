@@ -101,4 +101,4 @@ function SettingsView({ tabs, activeTabId }: { tabs: Tab[]; activeTabId: TabId }
 
 ## 参考
 
-- React 公式: Rules of React — React calls Components and Hooks（https://react.dev/reference/rules/react-calls-components-and-hooks）
+- [React 公式: Rules of React — React calls Components and Hooks](https://react.dev/reference/rules/react-calls-components-and-hooks)

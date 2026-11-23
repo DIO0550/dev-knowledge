@@ -1,6 +1,6 @@
 ---
 title: state と dispatch を別 Context に分割する
-tags: [react, context, useContext, useReducer, dispatch, performance, rerender]
+tags: [react, context, use-context, use-reducer, dispatch, performance, rerender]
 ---
 
 ## TL;DR
@@ -103,7 +103,7 @@ function useCountDispatch() {
 - **分割する**: dispatch だけ使うコンポーネントが多い／state が頻繁に変わる／再レンダーコストが見えてきた、というとき効く。
 - **やりすぎない**: コンシューマが少なく再レンダーが問題になっていないなら、1 つの Context のままで十分。分割は Context が 2 つになり Provider のネストも増えるので、必要になってから入れる。
 
-`state` が変わってもいないのに再レンダーされる無駄を消すのが目的。問題が無いうちは素朴な 1 Context で構わない。
+`state` が変わったときに、`dispatch` しか使っていないコンシューマまで再レンダーされる無駄を消すのが目的。問題が無いうちは素朴な 1 Context で構わない。
 
 ---
 

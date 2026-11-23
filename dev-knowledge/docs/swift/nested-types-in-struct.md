@@ -1,6 +1,6 @@
 ---
 title: Swift のネスト型（struct の中の enum / struct）の挙動と注意点
-tags: [swift, nested-types, struct, enum, namespace, generics, access-control, Codable, value-semantics, memory-layout]
+tags: [swift, nested-types, struct, enum, namespace, generics, access-control, codable, value-semantics, memory-layout]
 ---
 
 ## TL;DR
@@ -182,9 +182,9 @@ struct UserResponse: Codable {
 
 ## 参考
 
-- The Swift Programming Language — Nested Types: https://docs.swift.org/swift-book/documentation/the-swift-programming-language/nestedtypes/
-- SE-0404 Allow Protocols to be Nested in Non-Generic Contexts: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0404-nested-protocols.md
-- SE-0491 Module selectors for name disambiguation: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0491-module-selectors.md
-- Combine `Subscribers`（enum による名前空間の例）: https://developer.apple.com/documentation/combine/subscribers
-- Swift Forums — Namespacing: https://forums.swift.org/t/namespacing/33675
+- [The Swift Programming Language — Nested Types](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/nestedtypes/)
+- [SE-0404 Allow Protocols to be Nested in Non-Generic Contexts](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0404-nested-protocols.md)
+- [SE-0491 Module selectors for name disambiguation](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0491-module-selectors.md)
+- [Combine `Subscribers`（enum による名前空間の例）](https://developer.apple.com/documentation/combine/subscribers)
+- [Swift Forums — Namespacing](https://forums.swift.org/t/namespacing/33675)
 - 関連記事: [case なし enum による名前空間パターンと貧血ドメインモデルの懸念](./design/caseless-enum-static-and-ddd.md)

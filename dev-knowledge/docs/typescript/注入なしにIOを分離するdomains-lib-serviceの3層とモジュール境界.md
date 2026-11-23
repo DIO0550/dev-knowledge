@@ -140,11 +140,11 @@ Rust に移す場合の対応：domains → struct + impl の純粋関数、lib 
 
 ## 参考
 
-- Gary Bernhardt, "Boundaries"（Functional Core, Imperative Shell の原典）— https://www.destroyallsoftware.com/talks/boundaries
-- functional-architecture.org, "Functional Core, Imperative Shell" — https://functional-architecture.org/functional_core_imperative_shell/
-- Kenneth Lange, "The Functional Core, Imperative Shell Pattern"（TS 例あり）— https://kennethlange.com/functional-core-imperative-shell/
-- サバイバルTypeScript「コンパニオンオブジェクトパターン」— https://typescriptbook.jp/tips/companion-object
-- Zenn「値・型・名前空間の『三重定義』でReactコンポーネントをより柔軟に設計する」— https://zenn.dev/bmth/articles/ts-companion-object
-- Vitest, "Mocking Modules" — https://vitest.dev/guide/mocking/modules
-- Jasmine, "Module Mocking"（DI との比較）— https://jasmine.github.io/tutorials/module_mocking
-- howtocodeit, "Master Hexagonal Architecture in Rust"（Rust へ持ち出す場合）— https://www.howtocodeit.com/guides/master-hexagonal-architecture-in-rust
+- [Gary Bernhardt, "Boundaries"（Functional Core, Imperative Shell の原典）](https://www.destroyallsoftware.com/talks/boundaries)
+- [functional-architecture.org, "Functional Core, Imperative Shell"](https://functional-architecture.org/functional_core_imperative_shell/)
+- [Kenneth Lange, "The Functional Core, Imperative Shell Pattern"（TS 例あり）](https://kennethlange.com/functional-core-imperative-shell/)
+- [サバイバルTypeScript「コンパニオンオブジェクトパターン」](https://typescriptbook.jp/tips/companion-object)
+- [Zenn「値・型・名前空間の『三重定義』でReactコンポーネントをより柔軟に設計する」](https://zenn.dev/bmth/articles/ts-companion-object)
+- [Vitest, "Mocking Modules"](https://vitest.dev/guide/mocking/modules)
+- [Jasmine, "Module Mocking"（DI との比較）](https://jasmine.github.io/tutorials/module_mocking)
+- [howtocodeit, "Master Hexagonal Architecture in Rust"（Rust へ持ち出す場合）](https://www.howtocodeit.com/guides/master-hexagonal-architecture-in-rust)

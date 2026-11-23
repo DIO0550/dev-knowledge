@@ -1,17 +1,6 @@
 ---
-title: enumの振る舞いは`impl`に閉じ込める — バリアント追加の影響範囲と式の問題
-tags:
-  [
-    rust,
-    enum,
-    match,
-    impl,
-    expression-problem,
-    exhaustiveness,
-    non-exhaustive,
-    clippy,
-    api-design,
-  ]
+title: enumの振る舞いはimplに閉じ込める — バリアント追加の影響範囲と式の問題
+tags: [rust, enum, match, impl, expression-problem, exhaustiveness, non-exhaustive, clippy, api-design]
 ---
 
 ## TL;DR
@@ -30,7 +19,7 @@ tags:
 
 enumは閉じた集合であり、バリアントは型ではない。そのため「このバリアントだけを受け取る関数」は書けず、振る舞いは必ず `match` を通る。`match` を書く場所が呼び出し側に散っていると、バリアント追加のたびにコードベース全体を触ることになる。
 
-背後にあるのは**式の問題（expression problem）**で、これは言語機能で消せないトレードオフ：
+背後にあるのは**式の問題**（expression problem）で、これは言語機能で消せないトレードオフ：
 
 |       | バリアント（型）追加               | 操作（メソッド）追加     |
 | ----- | ---------------------------------- | ------------------------ |
@@ -98,8 +87,8 @@ pub enum PublicShape {
 
 ## 参考
 
-- purplesyringa, "The expression problem and Rust" (2025) — https://purplesyringa.moe/blog/the-expression-problem-and-rust/
+- [purplesyringa, "The expression problem and Rust" (2025)](https://purplesyringa.moe/blog/the-expression-problem-and-rust/)
 - Clippy lints: `wildcard_enum_match_arm`, `large_enum_variant`
 - Rust Reference, `#[non_exhaustive]` attribute
-- users.rust-lang.org, "Accessing enum variant trait method without matching" — https://users.rust-lang.org/t/accessing-enum-variant-trait-method-without-matching/59505
-- rust-lang/lang-team #122, Enum Variant Types（バリアントは型ではない） — https://github.com/rust-lang/lang-team/issues/122
+- [users.rust-lang.org, "Accessing enum variant trait method without matching"](https://users.rust-lang.org/t/accessing-enum-variant-trait-method-without-matching/59505)
+- [rust-lang/lang-team #122, Enum Variant Types（バリアントは型ではない）](https://github.com/rust-lang/lang-team/issues/122)
