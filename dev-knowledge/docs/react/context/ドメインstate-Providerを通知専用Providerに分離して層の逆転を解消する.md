@@ -31,7 +31,7 @@ function ProjectProvider({ children }) {
 
 元は「Container が state 管理も通知も内蔵する」という all-in-one 設計だった。state の変化と通知が同じコンポーネントに癒着していたため切り離せなかった。
 
-その後の 3 分割レビューで state が **observable** になった（loading / error も Context から観測できる）ため、通知を外から観測して発火する形に変えられるようになった。
+state（loading / error 等）を Context 経由で外部から **observable（観測可能）** に公開する構造にすれば、通知を外から観測して発火する形に切り離せる。
 
 ## 3. 解決
 

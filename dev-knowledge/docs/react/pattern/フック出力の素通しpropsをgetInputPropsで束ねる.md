@@ -1,6 +1,6 @@
 ---
 title: フック出力の素通し props を getInputProps() で束ねる
-tags: [react, props, composition, hooks, getInputProps, design-pattern]
+tags: [react, props, composition, hooks, get-input-props, design-pattern]
 ---
 
 ## TL;DR

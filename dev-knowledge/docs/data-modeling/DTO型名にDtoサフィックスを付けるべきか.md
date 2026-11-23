@@ -1,5 +1,5 @@
 ---
-title: DTO の型名に `Dto` サフィックスを付けるべきか
+title: DTO の型名に Dto サフィックスを付けるべきか
 tags: [naming-convention, dto, architecture, typescript, java, dotnet, nestjs, ddd, cqrs, hexagonal-architecture]
 ---
 
@@ -7,7 +7,7 @@ tags: [naming-convention, dto, architecture, typescript, java, dotnet, nestjs, d
 
 - 「`Dto` を付ける」習慣は **エコシステム依存** で、一律に「一般的」とは言えない。
 - **付けるのが標準**：NestJS、Spring/Java、OSGi Core 仕様、Prisma NestJS DTO ジェネレータのような **フレームワーク／規約が命名を前提にしている領域**。
-- **付けないのが推奨**：Ben Abt (.NET)、Ted M. Young (Java/Hexagonal)、Kevlin Henney、Ardalis らの **設計論寄りの識者**。彼らは `Dto` を「パターン名を型名に貼るのは冗長」と見る。
+- **付けないのが推奨**：Ben Abt (.NET)、Ted M. Young (Java/Hexagonal)、Kevlin Henney らの **設計論寄りの識者**。彼らは `Dto` を「パターン名を型名に貼るのは冗長」と見る（Ardalis は実務寄りの中間派）。
 - 反サフィックス派の代替案は収束していて、**役割ベース命名**（`CreateUserRequest` / `UserView` / `TransferMoneyCommand` / `MoneyWasSent`）に置き換える。
 - 判断軸は 3 つ：(1) エコシステムの慣例に従うか (2) 転送の役割が名前で明確化できるか (3) プロジェクト規模での視覚的ノイズ。
 
@@ -35,7 +35,7 @@ generator nestjsDto {
 
 ### Java / Spring 系
 
-日本の実務教材でも「DTO の命名規則：ファイル名は Dto または Bean で終える。例：`UserDto`, `UserBean`」と明記される慣行。JPA Buddy（IntelliJ プラグイン）は `(?.*)Dto` の正規表現で `MyEntityDto` と `MyEntity` を自動関連付けする機能を持つほど、命名規則としてツールに組み込まれている。
+日本の実務教材でも「DTO の命名規則：ファイル名は Dto または Bean で終える。例：`UserDto`, `UserBean`」と明記される慣行。JPA Buddy（IntelliJ プラグイン）は `(?<name>.*)Dto` の正規表現で `MyEntityDto` と `MyEntity` を自動関連付けする機能を持つほど、命名規則としてツールに組み込まれている。
 
 ### OSGi Core 仕様
 
@@ -126,7 +126,7 @@ type User = {
 }
 
 // 境界での変換関数がレイヤー分離を担う
-const parseUser: (payload: UserApiPayload) => Result
+const parseUser: (payload: UserApiPayload) => Result<User, ParseError>
 const serializeUser: (user: User) => UserApiPayload
 ```
 
@@ -138,14 +138,14 @@ const serializeUser: (user: User) => UserApiPayload
 
 ## 参考
 
-- Ben Abt, ".NET Naming Best Practises: DTOs" — https://medium.com/medialesson/net-naming-best-practises-dtos-f6b7961d823c
-- Ted M. Young, "Naming Conventions for DTOs" — https://ted.dev/articles/2021/10/30/naming-conventions-for-dtos/
-- Ardalis (Steve Smith), "5 Rules for DTOs" — https://ardalis.com/5-rules-dtos/
-- Bertil Muth, "Time to abandon pattern name suffixes?" — https://dev.to/bertilmuth/time-to-abandon-pattern-name-suffixes-56f9
-- OSGi Core 7 Specification, "57 Data Transfer Objects Specification" — https://docs.osgi.org/specification/osgi.core/7.0.0/framework.dto.html
-- Java DTO Naming Conventions — https://www.javathinking.com/blog/java-data-transfer-object-naming-convention/
-- Andrew Cairns, "Recognising Value Objects and DTOs" — https://acairns.substack.com/p/recognising-value-objects-and-dtos
-- Understanding the Use of DTO Suffix in Java Classes — https://www.javagists.com/understanding-the-use-of-dto-suffix-in-java-classes
-- NestJS DTOs guide — https://dev.to/cendekia/mastering-dtos-in-nestjs-24e4
-- prisma-generator-nestjs-dto — https://github.com/chenxinhu/prisma-generator-nestjs-dto
-- synergy-software, ".NET API best practices" — https://github.com/synergy-software/net-api-best-practices
+- [Ben Abt, ".NET Naming Best Practises: DTOs"](https://medium.com/medialesson/net-naming-best-practises-dtos-f6b7961d823c)
+- [Ted M. Young, "Naming Conventions for DTOs"](https://ted.dev/articles/2021/10/30/naming-conventions-for-dtos/)
+- [Ardalis (Steve Smith), "5 Rules for DTOs"](https://ardalis.com/5-rules-dtos/)
+- [Bertil Muth, "Time to abandon pattern name suffixes?"](https://dev.to/bertilmuth/time-to-abandon-pattern-name-suffixes-56f9)
+- [OSGi Core 7 Specification, "57 Data Transfer Objects Specification"](https://docs.osgi.org/specification/osgi.core/7.0.0/framework.dto.html)
+- [Java DTO Naming Conventions](https://www.javathinking.com/blog/java-data-transfer-object-naming-convention/)
+- [Andrew Cairns, "Recognising Value Objects and DTOs"](https://acairns.substack.com/p/recognising-value-objects-and-dtos)
+- [Understanding the Use of DTO Suffix in Java Classes](https://www.javagists.com/understanding-the-use-of-dto-suffix-in-java-classes)
+- [NestJS DTOs guide](https://dev.to/cendekia/mastering-dtos-in-nestjs-24e4)
+- [prisma-generator-nestjs-dto](https://github.com/chenxinhu/prisma-generator-nestjs-dto)
+- [synergy-software, ".NET API best practices"](https://github.com/synergy-software/net-api-best-practices)

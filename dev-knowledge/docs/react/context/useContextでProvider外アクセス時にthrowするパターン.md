@@ -1,6 +1,6 @@
 ---
 title: useContext で Provider 外アクセス時に throw するパターン
-tags: [react, hooks, context, useContext, typescript, design]
+tags: [react, hooks, context, use-context, typescript, design]
 ---
 
 ## TL;DR
@@ -120,7 +120,7 @@ export const useQueryClient = (queryClient?: QueryClient) => {
 ```
 
 ポイント:
-- `undefined` 初期値 + Provider 外で throw、という議論してきたパターンそのもの。
+- `undefined` 初期値 + Provider 外で throw、という本記事で紹介しているパターンそのもの。
 - `queryClient?` を引数で直接渡せる逃げ道（DI 的な口）を用意しているのが実装上うまい。テスト時や Provider を使わないケースに対応できる。
 - `null` ではなく `undefined` を採用。`null` を正当な値として使いたいコンテキストでは `undefined` の方が衝突しにくく安全、という程度の差。
 

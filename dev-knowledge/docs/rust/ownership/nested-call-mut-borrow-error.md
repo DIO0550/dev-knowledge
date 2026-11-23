@@ -1,6 +1,6 @@
 ---
 title: ネストした関数呼び出しで &mut を渡すと borrow エラーになる理由 — 10パターン実験つき
-tags: [rust, ownership, borrow-checker, mutable-reference, E0502, E0499, nested-call, argument-evaluation, NLL]
+tags: [rust, ownership, borrow-checker, mutable-reference, e0502, e0499, nested-call, argument-evaluation, nll]
 ---
 
 ## TL;DR
@@ -211,7 +211,7 @@ outer(&x, val);          // 改めて &x を作る
 
 この組み合わせで、`outer(&x, inner(&mut x))` は次のような順序で評価される。
 
-```
+```text
 1. &x を作る                       ← immutable borrow が始まる
 2. inner(&mut x) を評価する        ← ここで &mut x を作ろうとする → ❌
 3. outer(arg1, arg2) を呼ぶ
@@ -265,9 +265,9 @@ outer(&x, val); // OK
 
 ## 参考
 
-- The Rust Programming Language — References and Borrowing（`&mut` の排他ルール）: https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html
-- Rust Error Codes — E0502 / E0499 / E0596 / E0716: https://doc.rust-lang.org/error_codes/
-- The Rust Reference — Destructors / Temporary scopes: https://doc.rust-lang.org/reference/destructors.html
-- The Rust Reference — Expressions / Evaluation order of operands: https://doc.rust-lang.org/reference/expressions.html#evaluation-order-of-operands
-- Effective Rust — Item 14: Understand lifetimes: https://lurklurk.org/effective-rust/lifetimes.html
+- [The Rust Programming Language — References and Borrowing（`&mut` の排他ルール）](https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html)
+- [Rust Error Codes — E0502 / E0499 / E0596 / E0716](https://doc.rust-lang.org/error_codes/)
+- [The Rust Reference — Destructors / Temporary scopes](https://doc.rust-lang.org/reference/destructors.html)
+- [The Rust Reference — Expressions / Evaluation order of operands](https://doc.rust-lang.org/reference/expressions.html#evaluation-order-of-operands)
+- [Effective Rust — Item 14: Understand lifetimes](https://lurklurk.org/effective-rust/lifetimes.html)
 - 検証バージョン: rustc 1.75.0 (Ubuntu apt 版)、edition 2021

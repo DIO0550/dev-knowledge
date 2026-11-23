@@ -11,11 +11,11 @@ tags: [react, prop-drilling, dnd, code-analysis, refactoring]
 
 ## 問題
 
-Board → Column → TaskCard の DnD 系 7 props が全部バケツリレーに見え、「Context 化で一掃できる」と判断した。多層に渡っている props をまとめて数え、全部が素通しだと決めつけていた。
+Board → Column → TaskCard の DnD 系 6 props が全部バケツリレーに見え、「Context 化で一掃できる」と判断した。多層に渡っている props をまとめて数え、全部が素通しだと決めつけていた。
 
 ## 原因
 
-実際にコードを読むと、7 props のうち大半は途中の層で消費されていた。
+実際にコードを読むと、6 props のうち大半は途中の層で消費されていた。
 
 | props | 実態 |
 | --- | --- |
@@ -23,7 +23,7 @@ Board → Column → TaskCard の DnD 系 7 props が全部バケツリレーに
 | `onDragHover` / `onTaskDrop` / `onColumnDrop` | Column 自身が消費 |
 | `onTaskDragStart` / `onTaskDragEnd` | Column を素通りして TaskCard へ（真の素通し） |
 
-真の素通しは `onTaskDragStart` / `onTaskDragEnd` の **2 props のみ**。最初の「7 props 全部素通し」という分析は不正確で、`dragState` の所有者（＝ state の起点）や、Column が実際に消費している props まで「素通し」に含めて数えていた。
+真の素通しは `onTaskDragStart` / `onTaskDragEnd` の **2 props のみ**。最初の「6 props 全部素通し」という分析は不正確で、`dragState` の所有者（＝ state の起点）や、Column が実際に消費している props まで「素通し」に含めて数えていた。
 
 ## 解決
 
