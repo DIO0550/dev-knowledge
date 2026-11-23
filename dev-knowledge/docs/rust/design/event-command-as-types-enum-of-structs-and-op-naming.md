@@ -26,12 +26,12 @@ tags: [rust, naming, enum, struct, event, command, message, design-pattern, acto
 
 エコシステムを横断して確認すると、「操作をデータ（型）として表現し、後で解釈・実行する」構造はあらゆる分野で使われている:
 
-- **GUI イベント**: winit の `enum Event { WindowEvent {..}, DeviceEvent {..}, UserEvent(T), Suspended, Resumed, .. }`、crossterm の `enum Event { FocusGained, Key(KeyEvent), Mouse(MouseEvent), Paste(String), Resize(u16, u16), .. }`
+- **GUI イベント**: winit の `enum Event<T> { WindowEvent {..}, DeviceEvent {..}, UserEvent(T), Suspended, Resumed, .. }`、crossterm の `enum Event { FocusGained, Key(KeyEvent), Mouse(MouseEvent), Paste(String), Resize(u16, u16), .. }`
 - **非同期メッセージパッシング**: tokio の Actor パターン（Alice Ryhl の記事が事実上の標準レシピ）では、アクターへの命令を enum で定義し channel 経由で送る。1つの mpsc channel に全メッセージ種を載せるために enum を使うのが推奨されている:
 
 ```rust
 enum ActorMessage {
-    GetUniqueId { respond_to: oneshot::Sender },
+    GetUniqueId { respond_to: oneshot::Sender<u32> },
     // 応答が必要な命令は oneshot::Sender をペイロードに含める
 }
 ```
@@ -95,7 +95,7 @@ impl PatchOperation {
 | `std::ops` | 演算子オーバーロード用トレイト群のモジュール | 標準ライブラリのモジュール名そのもの |
 | `syn::BinOp` | `+`, `+=`, `&` などの二項演算子 enum | rustc の AST にも同名の型がある |
 | `syn::UnOp` | `enum UnOp { Deref(Star), Not(Bang), Neg(Sub) }` | |
-| `wgpu::LoadOp` / `StoreOp` | `enum LoadOp { Clear(V), Load }` | WebGPU 標準の `GPULoadOp` に対応 |
+| `wgpu::LoadOp` / `StoreOp` | `enum LoadOp<V> { Clear(V), Load }` | WebGPU 標準の `GPULoadOp` に対応 |
 | `cranelift` | `Opcode`（命令オペコード）、`AtomicRmwOp` | `op: AtomicRmwOp` のようにフィールド名としても使用 |
 | `json_patch` | `PatchOperation`（フル表記） | 短縮せず `Operation` を使う例 |
 
@@ -109,14 +109,14 @@ impl PatchOperation {
 
 ## 参考
 
-- Rust Design Patterns: Command — https://rust-unofficial.github.io/patterns/patterns/behavioural/command.html
-- rust-unofficial/patterns#252（Command パターンへの enum 追加議論・enum vs trait オブジェクトの使い分け） — https://github.com/rust-unofficial/patterns/issues/252
-- Actors with Tokio (Alice Ryhl) — https://ryhl.io/blog/actors-with-tokio/
-- json-patch: PatchOperation — https://docs.rs/json-patch/latest/json_patch/enum.PatchOperation.html
-- json-patch ソース（idubrov/json-patch） — https://github.com/idubrov/json-patch/blob/main/src/lib.rs
-- winit::event::Event — https://docs.rs/winit/latest/winit/event/enum.Event.html
-- crossterm::event::Event — https://docs.rs/crossterm/latest/crossterm/event/enum.Event.html
-- syn::BinOp — https://docs.rs/syn/latest/syn/enum.BinOp.html
-- syn::UnOp — https://docs.rs/syn/latest/syn/enum.UnOp.html
-- wgpu::LoadOp — https://docs.rs/wgpu/latest/wgpu/enum.LoadOp.html
-- cranelift Opcode — https://docs.rs/cranelift-codegen/latest/cranelift_codegen/ir/instructions/enum.Opcode.html
+- [Rust Design Patterns: Command](https://rust-unofficial.github.io/patterns/patterns/behavioural/command.html)
+- [rust-unofficial/patterns#252（Command パターンへの enum 追加議論・enum vs trait オブジェクトの使い分け）](https://github.com/rust-unofficial/patterns/issues/252)
+- [Actors with Tokio (Alice Ryhl)](https://ryhl.io/blog/actors-with-tokio/)
+- [json-patch: PatchOperation](https://docs.rs/json-patch/latest/json_patch/enum.PatchOperation.html)
+- [json-patch ソース（idubrov/json-patch）](https://github.com/idubrov/json-patch/blob/main/src/lib.rs)
+- [winit::event::Event](https://docs.rs/winit/latest/winit/event/enum.Event.html)
+- [crossterm::event::Event](https://docs.rs/crossterm/latest/crossterm/event/enum.Event.html)
+- [syn::BinOp](https://docs.rs/syn/latest/syn/enum.BinOp.html)
+- [syn::UnOp](https://docs.rs/syn/latest/syn/enum.UnOp.html)
+- [wgpu::LoadOp](https://docs.rs/wgpu/latest/wgpu/enum.LoadOp.html)
+- [cranelift Opcode](https://docs.rs/cranelift-codegen/latest/cranelift_codegen/ir/instructions/enum.Opcode.html)

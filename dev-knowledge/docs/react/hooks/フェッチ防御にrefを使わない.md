@@ -1,6 +1,6 @@
 ---
 title: useEffect / event handler でのフェッチ防御に ref を使わない — render rule と escape hatch から導く
-tags: [react, useEffect, useRef, useState, data-fetching, anti-pattern, StrictMode, escape-hatch, AbortController, race-condition, react-query, SWR, event-handler, custom-hook]
+tags: [react, use-effect, use-ref, use-state, data-fetching, anti-pattern, strict-mode, escape-hatch, abort-controller, race-condition, react-query, swr, event-handler, custom-hooks]
 ---
 
 ## TL;DR
@@ -230,9 +230,9 @@ return <button onClick={() => submit(data)} disabled={isSubmitting}>送信</butt
 
 ```ts
 function useSearch() {
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const controllerRef = useRef(null);
+  const controllerRef = useRef<AbortController | null>(null);
 
   const search = async (query: string) => {
     controllerRef.current?.abort();              // 前の呼び出しがあれば中断

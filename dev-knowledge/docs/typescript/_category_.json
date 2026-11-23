@@ -2,6 +2,6 @@
   "label": "TypeScript",
   "link": {
     "type": "generated-index",
-    "description": "TypeScript の型設計・言語仕様・互換性に関する知見。"
+    "description": "TypeScript に関する知見・遭遇した問題と解決策。"
   }
 }

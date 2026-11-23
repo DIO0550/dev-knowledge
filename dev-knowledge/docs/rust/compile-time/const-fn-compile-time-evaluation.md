@@ -9,13 +9,13 @@ tags: [rust, const-fn, const, compile-time, ctfe, performance]
 - `const` / `static` の初期化式や配列長など、**const コンテキストで呼び出されたときだけ**コンパイル時評価される
 - 通常コンテキストで呼ぶと普通の関数として実行時に走る
 - 通常関数 → `const fn` への変更は**後方互換**。書ける範囲なら基本付けて困らない
-- 制約はある: トレイトメソッド呼び出し、ヒープ確保、`for` の一部、`?` などはまだ不可（バージョンで段階的に解禁中）
+- 制約はある: トレイトメソッド呼び出し、ヒープ確保、`for` ループ、`?` などはまだ不可（バージョンで段階的に解禁中）
 
 ## このドキュメントの射程
 
 `const fn` とは何か、通常の関数とどう違うか、何ができて何ができないか、いつ使うべきかを整理する。
 
-環境: Rust 1.65 以降を想定（match や trait メソッド経由の一部が安定化済み）
+環境: Rust 1.79 以降を想定（`if` / `match` / `while` や `const { ... }` ブロックが安定化済み）
 
 ## const fn とは何か
 
@@ -78,18 +78,18 @@ fn main() {
 
 - 基本的な算術・論理・比較・ビット演算
 - `if` / `else` / `match`
-- `while` ループ、`for i in 0..N`（range 限定）
+- `while` / `loop` ループ
 - `let` バインディング、ブロック式
 - 構造体・タプル・配列の構築とアクセス
 - 他の `const fn` の呼び出し
 - `panic!`（文字列リテラルのみ）
 
-書けない（執筆時点）:
+書けない（執筆時点の stable）:
 
 - トレイトメソッド呼び出し全般（`+` などの演算子オーバーロードは型ごとに別途対応中）
 - ヒープ確保（`Vec::new` などは const にできるが要素追加は不可）
-- `for` でユーザー定義イテレータを回す
-- `?` 演算子（nightly のみ）
+- `for` ループ（`0..N` を含め内部で `IntoIterator::into_iter` を呼ぶため不可。`while` で代用する）
+- `?` 演算子（`Try` トレイト呼び出しを伴うため不可）
 - 動的ディスパッチ
 
 `const fn` でできる範囲は**バージョンごとに段階的に拡大**している。詰まったらまず最新の Rust リファレンスを見るのが確実。
@@ -153,7 +153,7 @@ const fn version_string() -> &'static str {
 }
 ```
 
-### const ジェネリックと組み合わせる
+### 配列長や const ジェネリック引数の計算に使う
 
 ```rust
 const fn buffer_size(n: usize) -> usize {
@@ -161,8 +161,14 @@ const fn buffer_size(n: usize) -> usize {
 }
 
 struct Buffer<const N: usize> {
-    data: [u8; buffer_size(N)],  // const fn だから配列長に使える
+    data: [u8; N],
 }
+
+// 具体定数を渡して配列長・const ジェネリック引数を計算できる
+const BUF_LEN: usize = buffer_size(16);
+type DefaultBuffer = Buffer<{ buffer_size(16) }>;
+// ※ struct Buffer<const N: usize> { data: [u8; buffer_size(N)] } のように
+//    ジェネリック引数 N を式に混ぜる書き方は nightly (generic_const_exprs) 限定
 ```
 
 ## まとめ

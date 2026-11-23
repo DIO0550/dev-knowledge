@@ -1,6 +1,6 @@
 ---
 title: ページ内スクロール（ジャンプ）の設計判断軸 — ref命令 / state依存 / context購読
-tags: [react, scroll, scrollIntoView, useRef, useEffect, useLayoutEffect, context, design-pattern, anti-pattern]
+tags: [react, scroll, scroll-into-view, use-ref, use-effect, use-layout-effect, context, design-pattern, anti-pattern]
 ---
 
 ## TL;DR
@@ -69,8 +69,8 @@ function TableOfContents() {
 
 // ケースB: 条件付きで現れる要素へ飛ぶ → state を依存配列に入れて Effect でスクロール
 function SubmitForm() {
-  const [error, setError] = useState(null);
-  const errorRef = useRef(null);
+  const [error, setError] = useState<string | null>(null);
+  const errorRef = useRef<HTMLParagraphElement>(null);
 
   // error が立って要素がコミットされてから scrollIntoView が有効になる
   useLayoutEffect(() => {
@@ -79,10 +79,9 @@ function SubmitForm() {
     }
   }, [error]);
 
-  if (!error) return null;
   return (
     <>
-      <p ref={errorRef}>{error}</p>
+      {error && <p ref={errorRef}>{error}</p>}
       {/* ...フォーム本体... */}
     </>
   );

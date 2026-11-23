@@ -1,6 +1,6 @@
 ---
 title: useState と useReducer の使い分け
-tags: [react, hooks, useState, useReducer, reducer, dispatch, state, 設計]
+tags: [react, hooks, use-state, use-reducer, reducer, dispatch, state, design]
 ---
 
 ## TL;DR
@@ -70,7 +70,7 @@ react.dev は「どちらが絶対」とは言わず、次の基準を示して�
 |---|---|---|
 | **コードサイズ** | 前もって書く量が少ない | reducer + dispatch で多め。ただし**似た更新が多いほど**全体のコードは減る |
 | **可読性** | 単純な更新では読みやすい | 複雑な更新で「how（reducer）／ what happened（action）」を分離でき読みやすい |
-| **デバッグ** | どこで・なぜ誤ったか追いにくい | reducer に `console.log` を仕込めば**全更新とその原因（action）**を追える。ただしステップ数は増える |
+| **デバッグ** | どこで・なぜ誤ったか追いにくい | reducer に `console.log` を仕込めば**全更新とその原因**（action）を追える。ただしステップ数は増える |
 | **テスト** | コンポーネントごとに実環境でテスト | reducer は純粋関数なので**単独で export してテスト**できる |
 
 ---
@@ -131,7 +131,7 @@ react.dev は「どちらが絶対」とは言わず、次の基準を示して�
 
 ## 参考
 
-- React 公式「Extracting State Logic into a Reducer」内 "Comparing useState and useReducer"（コードサイズ／可読性／デバッグ／テストの4観点比較、切り替えのサイン）: https://react.dev/learn/extracting-state-logic-into-a-reducer
-- React 公式 useReducer リファレンス（シグネチャ・dispatch・action の慣習）: https://react.dev/reference/react/useReducer
+- [React 公式「Extracting State Logic into a Reducer」内 "Comparing useState and useReducer"（コードサイズ／可読性／デバッグ／テストの4観点比較、切り替えのサイン）](https://react.dev/learn/extracting-state-logic-into-a-reducer)
+- [React 公式 useReducer リファレンス（シグネチャ・dispatch・action の慣習）](https://react.dev/reference/react/useReducer)
 
 （出典は react.dev・React 19 系の最新ドキュメント、2026-06-22 時点で確認）

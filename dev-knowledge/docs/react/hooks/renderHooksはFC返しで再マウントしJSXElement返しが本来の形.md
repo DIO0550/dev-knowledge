@@ -294,30 +294,30 @@ export function App() {
 
 FC を hook 内で再生成しないので参照は安定 → 再マウントなし。`react-table` や `react-hook-form` も類似の方針（hook と FC を別管理）を採用しているとの指摘がある。
 
-## 結論まとめ
+## 形式ごとの比較
 
 | 形式 | 再マウント | 評価 |
 |------|----------|------|
 | `[Modal, open] = useModal()` で `Modal` が **hook 内で定義された React.FC** | 起きる（fizumi 氏の検証あり）。完全な防止には全ての参照のメモ化が必要 | **避けるべき** |
 | `[checked, checkbox] = useCheckbox()` で `checkbox` が **JSX.Element** | 起きない | **uhyo 氏推奨の本来の形** |
-| `[checked, renderCheckbox] = useCheckbox()` で関数が JSX を返す（呼び出し側で `{renderCheckbox()}`) | 起きない | 拡張性目的で実用例多い |
+| `[checked, renderCheckbox] = useCheckbox()` で関数が JSX を返す（呼び出し側で `{renderCheckbox()}`） | 起きない | 拡張性目的で実用例多い |
 | FC を hook の外で静的定義、hook は FC + props を返す | 起きない | 実用的な折衷 |
 
 「render hooks はアンチパターン」と批判される場合、対象は **FC 返し版**であることが多い。JSX.Element 返し版は技術的なパフォーマンス問題は起きない。
 
-ただし JSX.Element 返し版でも、JSX の中に `{renderXxx()}` のような関数呼び出しが現れることへの違和感（宣言性の低下、JSX を読んだだけで何が出てくるか分からない）は別の論点として残る。これは hook と UI の分離原則の議論（別記事「headless パターン」参照）。
+ただし JSX.Element 返し版でも、JSX の中に `{renderXxx()}` のような関数呼び出しが現れることへの違和感（宣言性の低下、JSX を読んだだけで何が出てくるか分からない）は別の論点として残る。これは hook と UI の分離原則の議論（別記事 [hooks と UI の分離原則](../pattern/hooksとUIの分離原則とheadlessの実装2派.md) 参照）。
 
 ## まとめ
 
 - 「render hooks がアンチパターンか」の議論は「FC 返し」と「JSX.Element 返し」を区別せずに行われがちで、対象が噛み合わない
 - 採用するなら **JSX.Element 返し**、**`() => JSX.Element` 返し**、または **FC を hook 外で静的定義** に限定する
-- そもそも「流行る気配がない」と命名者自身が認めるパターンを公開 API として採用する積極的な理由は薄く、内部実装としての整理整頓用途に留めるのが穏当
+- そもそも「流行る気配がない」と紹介者（uhyo 氏）自身が認めるパターンを公開 API として採用する積極的な理由は薄く、内部実装としての整理整頓用途に留めるのが穏当
 
 ## 参考
 
-- LINE 証券「コンポーネントをカスタムフックで提供してみた」（初出）: https://engineering.linecorp.com/ja/blog/line-securities-frontend-3
-- uhyo「Render hooksをコンポーネントの拡張として理解する」: https://qiita.com/uhyo/items/cb6983f52ac37e59f37e
-- fizumi「render hooks パターンの注意点と対策」: https://zenn.dev/fizumi/articles/083db23e25106e
-- アーティス社「Beyond the render hooks pattern」: https://www.asobou.co.jp/blog/web/reactfc-renderhooks
-- devstation「Why You Shouldn't Put JSX in Custom React Hooks」: https://devstation.hashnode.dev/why-you-shouldnt-put-jsx-in-custom-react-hooks
-- bitsrc「Return Component From Hooks」: https://blog.bitsrc.io/new-react-design-pattern-return-component-from-hooks-79215c3eac00
+- [LINE 証券「コンポーネントをカスタムフックで提供してみた」（初出）](https://engineering.linecorp.com/ja/blog/line-securities-frontend-3)
+- [uhyo「Render hooksをコンポーネントの拡張として理解する」](https://qiita.com/uhyo/items/cb6983f52ac37e59f37e)
+- [fizumi「render hooks パターンの注意点と対策」](https://zenn.dev/fizumi/articles/083db23e25106e)
+- [アーティス社「Beyond the render hooks pattern」](https://www.asobou.co.jp/blog/web/reactfc-renderhooks)
+- [devstation「Why You Shouldn't Put JSX in Custom React Hooks」](https://devstation.hashnode.dev/why-you-shouldnt-put-jsx-in-custom-react-hooks)
+- [bitsrc「Return Component From Hooks」](https://blog.bitsrc.io/new-react-design-pattern-return-component-from-hooks-79215c3eac00)

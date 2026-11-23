@@ -44,7 +44,7 @@ Rust のテストは「ユニットテスト」と「統合テスト」で**置�
 
 ### ファイル構造
 
-```
+```text
 src/
 ├── lib.rs
 ├── calc.rs           ← 実装本体だけ
@@ -88,7 +88,7 @@ fn test_secret_bonus() {
 
 ### テストをディレクトリにまとめたい場合
 
-```
+```text
 src/
 ├── lib.rs
 ├── calc.rs
@@ -105,7 +105,7 @@ mod tests;
 
 ### 注意すべき罠: #[path] の相対パス起点
 
-`#[path]` を**インラインモジュールブロックの外（ファイルのトップレベル）**に書いた場合、相対パスは「その属性が書かれたソースファイルがあるディレクトリ」基準で解決される。だから `src/calc.rs` のトップレベルに書けば `src/calc_tests.rs` を素直に指す。
+`#[path]` を**インラインモジュールブロックの外**（ファイルのトップレベル）に書いた場合、相対パスは「その属性が書かれたソースファイルがあるディレクトリ」基準で解決される。だから `src/calc.rs` のトップレベルに書けば `src/calc_tests.rs` を素直に指す。
 
 問題は**インラインモジュールブロックの中**に `#[path]` を書いたとき。Rust Reference の定義では:
 
@@ -138,9 +138,9 @@ mod tests;
 
 ## 参考
 
-- Test Organization - The Rust Programming Language: https://doc.rust-lang.org/book/ch11-03-test-organization.html
-- Conditional compilation（`test` cfg の定義）- The Rust Reference: https://doc.rust-lang.org/reference/conditional-compilation.html
-- Modules（#[path] 属性 / mod-rs・non-mod-rs の定義）- The Rust Reference: https://doc.rust-lang.org/reference/items/modules.html
-- How To Structure Unit Tests in Rust（#[path] でテスト分離する手法）: https://medium.com/better-programming/how-to-structure-unit-tests-in-rust-cc4945536a32
-- Better location for unit tests in Rust（#[path] の解説）: http://xion.io/post/code/rust-unit-test-placement.html
-- rust-lang/rust #139602（#[path] がモジュールディレクトリ相対である挙動の議論）: https://github.com/rust-lang/rust/issues/139602
+- [Test Organization - The Rust Programming Language](https://doc.rust-lang.org/book/ch11-03-test-organization.html)
+- [Conditional compilation（`test` cfg の定義）- The Rust Reference](https://doc.rust-lang.org/reference/conditional-compilation.html)
+- [Modules（`#[path]` 属性 / mod-rs・non-mod-rs の定義）- The Rust Reference](https://doc.rust-lang.org/reference/items/modules.html)
+- [How To Structure Unit Tests in Rust（`#[path]` でテスト分離する手法）](https://medium.com/better-programming/how-to-structure-unit-tests-in-rust-cc4945536a32)
+- [Better location for unit tests in Rust（`#[path]` の解説）](http://xion.io/post/code/rust-unit-test-placement.html)
+- [rust-lang/rust #139602（`#[path]` がモジュールディレクトリ相対である挙動の議論）](https://github.com/rust-lang/rust/issues/139602)

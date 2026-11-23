@@ -1,6 +1,6 @@
 ---
 title: useEffect内でsetStateを呼ぶルール（set-state-in-effect）の実際の適用範囲とパターン別NG/OK
-tags: [react, useEffect, useState, anti-pattern, eslint-plugin-react-hooks, set-state-in-effect, rendering, performance]
+tags: [react, use-effect, use-state, anti-pattern, eslint-plugin-react-hooks, set-state-in-effect, rendering, performance]
 ---
 
 ## TL;DR
@@ -18,9 +18,9 @@ tags: [react, useEffect, useState, anti-pattern, eslint-plugin-react-hooks, set-
 
 `set-state-in-effect` が問題にしているのは、**Effect本体で同期的に呼ばれる setState** に限定される。
 
-同期setが問題な理由: React は Effect の同期実行中に setState が呼ばれると、ブラウザがペイントする前に即座に再レンダリングを走らせる。結果として「state更新を適用するために1回、その後Effectが走った後にもう1回」の二重レンダリングになる。1レンダーで済むはずのものが2レンダーになるのが本質的なムダで、視覚的なジャンクの原因にもなる。
+同期 set が問題な理由: React は Effect の同期実行中に setState が呼ばれると、ブラウザがペイントする前に即座に再レンダリングを走らせる。結果として「state 更新を適用するために 1 回、その後 Effect が走った後にもう 1 回」の二重レンダリングになる。1 レンダーで済むはずのものが 2 レンダーになるのが本質的なムダで、画面のちらつき・カクつき（jank）の原因にもなる。
 
-一方で以下は **ルールがフラグしない**:
+一方で以下は **ルールの警告対象にならない**:
 
 - `.then()` / async関数のコールバック内
 - `setTimeout` / `setInterval` / `requestAnimationFrame` のコールバック内
@@ -240,7 +240,7 @@ function ClientOnlyContent() {
   const [didMount, setDidMount] = useState(false);
 
   useEffect(() => {
-    setDidMount(true); // ← set-state-in-effect ルールがflag
+    setDidMount(true); // ← set-state-in-effect ルールが警告を出す
   }, []);
 
   if (!didMount) return null;
@@ -263,5 +263,5 @@ React公式ドキュメント / Next.js / next-themes / MUI Joy UI などで採�
 - [set-state-in-effect – React](https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect)
 - [You Might Not Need an Effect – React](https://react.dev/learn/you-might-not-need-an-effect)
 - [set-state-in-effect | ESLint React](https://eslint-react.xyz/docs/rules/set-state-in-effect)
-- [Bug: `react-hooks/set-state-in-effect` overly strict? #34743](https://github.com/react/react/issues/34743) — SSR hydration パターンなど false positive の議論
+- [Bug: `react-hooks/set-state-in-effect` overly strict? #34743](https://github.com/facebook/react/issues/34743) — SSR hydration パターンなど false positive の議論
 - [Self-Correcting Components (uhyo)](https://zenn.dev/uhyo/articles/state-update-while-rendering) — レンダー中setの理論的背景

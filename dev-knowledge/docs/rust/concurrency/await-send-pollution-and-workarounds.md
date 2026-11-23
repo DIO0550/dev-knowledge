@@ -23,7 +23,7 @@ error: future cannot be sent between threads safely
 note: future is not `Send` as this value is used across an await
    |
    |     let rc = Rc::new(42);
-   |         -- has type `Rc` which is not `Send`
+   |         -- has type `Rc<i32>` which is not `Send`
    |     some_io().await;
    |               ^^^^^ await occurs here, with `rc` maybe used later
 ```
@@ -53,7 +53,7 @@ async fn main() {
 // 概念的に生成されるもの
 enum TaskState {
     AwaitingIo {
-        rc: Rc,        // ← Rc が状態に焼き込まれる
+        rc: Rc<i32>,   // ← Rc が状態に焼き込まれる
         fut: SomeIoFut,
     },
     Done,
@@ -62,7 +62,7 @@ enum TaskState {
 
 `Rc` は内部の参照カウンタを非アトミックに操作するため `!Send`。フィールドに `!Send` な型を持つ構造体は、auto trait の伝播で構造体ごと `!Send` になる。よってステートマシン全体が `!Send` になり、`tokio::spawn` の `F: Send + 'static` 境界に合わなくなる。
 
-**ポイント**: `Rc` を `.await` の**後**で使ったかどうかではない。コンパイラはフロー解析で「`.await` を跨いで `rc` が生存し得るか」を見ている。`drop(rc)` を `.await` の前に明示する、あるいは下のようにスコープで囲うことで、生存範囲を中断ポイントの前に閉じ込められる。
+**ポイント**: `Rc` を `.await` の**後**で使ったかどうかではない。コンパイラはスコープベースの解析で「`.await` を跨いで `rc` が生存し得るか」を見ている。明示的な `drop(rc)` だけでは `Send` 解析エラーが消えないケースもあるため、下のように**ブロックスコープで囲って**生存範囲を中断ポイントの前に確実に閉じ込めるのが定石。
 
 ## 解決
 
@@ -82,7 +82,7 @@ async fn task() {
 |---|---|---|
 | `Rc` | `Arc` | 原子的カウンタになる分わずかにコストあり |
 | `RefCell` | `tokio::sync::Mutex` | 非同期対応の Mutex。lock も `.await` する |
-| `Cell` | `AtomicXxx` / `Arc<Mutex>` | 値の種類による |
+| `Cell` | `AtomicXxx` / `Arc<Mutex<T>>` | 値の種類による |
 | `std::sync::MutexGuard` | （後述: スコープで閉じる） | 型を変えるより使い方を変える |
 
 ### 解2: スコープでドロップさせ、`.await` 前に手放す
@@ -103,24 +103,24 @@ async fn task() {
 
 ### 落とし穴: `std::sync::MutexGuard` を跨いではいけない
 
-`std::sync::MutexGuard` は `Send` であっても、`.await` を跨いで保持するのは設計上の地雷である。
+`std::sync::MutexGuard` は **`!Send`** なので、マルチスレッドランタイム（`tokio::spawn`）で `.await` を跨いで保持するとコンパイルエラーになる。仮にシングルスレッド実行や `Send` なロック実装で `.await` を跨げたとしても、同期ロックを跨いで保持すること自体が設計上の地雷である。
 
 ```rust
 // ❌ ロックを持ったまま .await する
-async fn bad(m: &std::sync::Mutex) {
+async fn bad(m: &std::sync::Mutex<i32>) {
     let guard = m.lock().unwrap();
     some_io().await;            // ← この間ロックを保持し続けている
     *guard += 1;
 }
 ```
 
-タスクが `.await` で中断され、再開時に別のワーカースレッドに移ったとしよう。`std::sync::Mutex` は「ロックを取ったスレッドが解放する」を前提に作られている。スレッドをまたぐ動きが起きると未定義動作にはならないものの、デッドロックやロング・ホールド・タイムを誘発しやすい。さらに `.await` 中に他のタスクが同じロックを取ろうとして全員ブロック ― と、スループットが致命的に落ちる。
+タスクが `.await` で中断され、再開時に別のワーカースレッドに移った場合、`std::sync::Mutex` は「ロックを取ったスレッドが解放する」前提の OS ミューテックスに依存するため、安全にスレッドを跨げない（だからこそ Rust 標準ライブラリで `!Send` にされている）。さらに `.await` 中に他のタスクが同じロックを取ろうとしてワーカースレッドごとブロックされ、デッドロックやスループット低下を招く。
 
 対処は2通り:
 
 ```rust
 // ✅ ロックは短いスコープに閉じ、.await 前に手放す
-async fn good1(m: &std::sync::Mutex) {
+async fn good1(m: &std::sync::Mutex<i32>) {
     {
         let mut guard = m.lock().unwrap();
         *guard += 1;
@@ -129,7 +129,7 @@ async fn good1(m: &std::sync::Mutex) {
 }
 
 // ✅ どうしても .await を跨ぎたいなら tokio::sync::Mutex に変える
-async fn good2(m: &tokio::sync::Mutex) {
+async fn good2(m: &tokio::sync::Mutex<i32>) {
     let mut guard = m.lock().await;   // 非同期ロック
     some_io().await;                  // 跨いで保持してよい
     *guard += 1;
