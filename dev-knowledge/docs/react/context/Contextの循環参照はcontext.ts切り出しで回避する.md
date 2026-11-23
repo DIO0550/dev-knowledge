@@ -15,7 +15,7 @@ tags: [react, context, circular-dependency, module-structure, architecture]
 
 `ToastProvider` が `ToastContainer` を内蔵描画したい。だが以下の import 経路で循環参照が起きる。
 
-```
+```text
 ToastProvider.tsx  ──import──▶  ToastContainer.tsx
       ▲                                │
       └──────────import───────────────┘
@@ -65,7 +65,7 @@ import { ToastContainer } from "./ToastContainer";
 import { useToasts } from "./context";
 ```
 
-import の向きが `Provider → context ← Container` の **一方向（共通の下位モジュールへ集約）** になり、Provider ⇄ Container の相互依存が消える。
+この構造では import の向きが `Provider → context ← Container` の **一方向（共通の下位モジュールへ集約）** になり、Provider ⇄ Container の相互依存が消える。
 
 ## 4. 判断のポイント
 

@@ -1,6 +1,6 @@
 ---
-title: Rust の #[expect(lint)] は『無効化』ではなく『監視の入れ替え』
-tags: [rust, lint, attribute, expect, allow, cfg_attr, dead_code, rust-1.81]
+title: Rust の #[expect(lint)] は「無効化」ではなく「監視の入れ替え」
+tags: [rust, lint, attribute, expect, allow, cfg-attr, dead-code, rust-1.81]
 ---
 
 ## TL;DR
@@ -13,7 +13,7 @@ tags: [rust, lint, attribute, expect, allow, cfg_attr, dead_code, rust-1.81]
 
 ## このドキュメントの射程
 
-未使用予定の method に `#[allow(dead_code)]` を貼ると、後から呼び出し元を追加しても属性が残ったまま腐る。これを防ぐための `#[expect(...)]` 属性の挙動と、`cfg_attr` と組み合わせたときの意味を整理する。
+未使用予定のメソッドに `#[allow(dead_code)]` を貼ると、後から呼び出し元を追加しても属性が残ったまま腐る。これを防ぐための `#[expect(...)]` 属性の挙動と、`cfg_attr` と組み合わせたときの意味を整理する。
 
 対象: Rust 1.81.0 以降。
 
@@ -21,7 +21,7 @@ tags: [rust, lint, attribute, expect, allow, cfg_attr, dead_code, rust-1.81]
 
 `#[allow(dead_code)]` は対象 lint を**恒久的に**抑制する。
 
-- 後で method が呼ばれるようになっても警告は出ない。
+- 後でメソッドが呼ばれるようになっても警告は出ない。
 - 属性自体が陳腐化したことを誰も検知しない。
 - 「Issue が解消されたら外す」というコメントは grep でしか拾えず、抜ける。
 
@@ -29,7 +29,7 @@ tags: [rust, lint, attribute, expect, allow, cfg_attr, dead_code, rust-1.81]
 
 ## 解決（`#[expect(lint)]` で監視に切り替える）
 
-`#[expect(lint)]` は `allow` と同様に lint を抑制するが、**`expect` 属性によって実際に抑制された lint emission がなければ、その期待は満たされていない**と判定される（Rust Reference）。
+`#[expect(lint)]` は `allow` と同様に lint を抑制するが、**`expect` 属性によって実際に抑制された lint 警告の発火（lint emission）がなければ、その期待は満たされていない**と判定される（Rust Reference）。
 
 期待が満たされない場合は `unfulfilled_lint_expectations` lint が `expect` 属性側に発火する。結果として:
 
@@ -39,15 +39,15 @@ tags: [rust, lint, attribute, expect, allow, cfg_attr, dead_code, rust-1.81]
 | 対象 lint が発生しない | 何も起きない | **警告: この expect は不要** |
 
 ```rust
-// 動かない例（呼び出し元が後で追加されたとき allow は腐る）
+// 問題のある例（呼び出し元が後で追加されたとき allow は腐る）
 #[allow(dead_code)]
 fn delete_task() { /* ... */ }
 // → 後で呼び出されても allow は黙って残り続ける
 
-// 動く例（呼び出し元が追加されたら警告が出る）
+// 推奨例（呼び出し元が追加されたら警告が出る）
 #[expect(
     dead_code,
-    reason = "delete_task IPC (Issue #90) で本 method を呼び出す予定"
+    reason = "後続のタスク削除ハンドラから呼び出す予定"
 )]
 fn delete_task() { /* ... */ }
 // → 呼び出されるようになった瞬間に unfulfilled_lint_expectations が発火
@@ -60,7 +60,7 @@ fn delete_task() { /* ... */ }
     not(test),
     expect(
         dead_code,
-        reason = "delete_task IPC (Issue #90) で本 method を呼び出す予定"
+        reason = "後続のタスク削除ハンドラから呼び出す予定"
     )
 )]
 fn delete_task() { /* ... */ }
@@ -70,7 +70,7 @@ fn delete_task() { /* ... */ }
 
 なぜ `not(test)` で限定するか:
 
-- テストビルドでは method がテストから既に呼ばれており、`dead_code` が発生しない可能性がある。
+- テストビルドではメソッドがテストから既に呼ばれており、`dead_code` が発生しない可能性がある。
 - そのまま `#[expect(dead_code)]` だけだと、テストビルド時に「期待した dead_code が出ないぞ」と `unfulfilled_lint_expectations` が逆に発火してしまう。
 - ビルド構成によって lint の発生有無が変わる場合は、`cfg_attr` で expect の適用範囲を絞る必要がある。
 

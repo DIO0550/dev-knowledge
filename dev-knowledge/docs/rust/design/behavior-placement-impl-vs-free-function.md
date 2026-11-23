@@ -11,26 +11,26 @@ tags: [rust, design, ddd, impl, associated-function, free-function, borrow-check
 
 ## このドキュメントの射程
 
-設計の基本として「型 + impl にまとめる（DDD 的なリッチモデル寄り）」で進めてよい。ただし Gemini に調べさせたところ、impl 一辺倒では説明がつかず、**メモリ（借用チェッカー）由来で free 関数が要求される場面がある**ことが分かった。その「例外側」を記録しておく。
+設計の基本として「型 + impl にまとめる（DDD 的なリッチモデル寄り）」で進めてよい一方、impl 一辺倒では説明がつかず、**メモリ（借用チェッカー）由来で free 関数が要求される場面**がある。その例外側と判断基準を整理する。
 
 ## 原因
 
 ### 基本は impl ベースでよい（これが主軸）
 
-- **C-METHOD**: 明確なレシーバを持つ操作はメソッドにする。自動借用（`value.method()`）、import 不要、rustdoc で型ページに集約、IDE 補完での発見性。
+- **C-METHOD**: 明確なレシーバを持つ操作はメソッドにする。自動借用（`value.method()`）が効き、`use` が不要で、rustdoc の型ページに一覧化され IDE 補完で見つけやすい。
 - **C-CTOR**: コンストラクタは impl の関連関数 `new`。`make_type()` のような free 関数はモジュール名前空間を汚す。
 - **C-CONV**: 型変換は `as_` / `to_` / `into_` プレフィックスのメソッド。
 - 標準ライブラリも `str::to_lowercase()` のようにメソッドで提供している。
 
 → struct + impl が主流という認識で正しい。free 関数を漫然と散らかすのはアンチパターン。
 
-### ただしメモリの事情で free 関数が正当になる（Gemini が補完した点）
+### メモリの事情で free 関数が正当になるケース
 
 impl にまとめる規範と、借用チェッカーの制約は**対立する圧力**になることがある。
 
-- **借用分割（Splitting Borrows）の回避**: `&mut self` を取ると、コンパイラはシグネチャだけ見て「構造体全体が排他借用された」と判定する（本体には踏み込まない）。disjoint なフィールドへの並行アクセスでも E0499 で弾かれる。これを避けるため、必要なフィールドだけを個別引数で受ける free 関数に切り出すのは**正当な設計判断**。
+- **借用分割（Splitting Borrows）の回避**: `&mut self` を取ると、コンパイラはシグネチャだけ見て「構造体全体が排他借用された」と判定する（本体には踏み込まない）。互いに独立したフィールドへの同時アクセスでも E0499 で弾かれる場合があり、必要なフィールドだけを個別引数で受ける free 関数に切り出すのは**正当な設計判断**。
 - **Deref 強制によるシャドウイング回避（C-SMART-PTR）**: スマートポインタに固有メソッドを足すと、Deref で解決される中身の型の同名メソッドと衝突する。だから `Box::into_raw(b)` は `b.into_raw()` にしない（`impl Box` 内の関連関数として定義されている）。
-- **FFI**: `extern "C"` + `#[no_mangle]` の公開関数は、name mangling と `self` の概念がない C 側から呼ぶため、必ずトップレベル free 関数になる。
+- **FFI**: `extern "C"` + `#[no_mangle]` の公開関数は、C 言語側に名前マングリングや `self` の概念がないため、必ずトップレベル free 関数になる。
 
 ## 解決
 
@@ -47,23 +47,30 @@ impl Rectangle {
     fn area(&self) -> u32 { self.width * self.height }              // C-METHOD
 }
 
-// ❌ 借用分割で詰まる: step が self 全体を可変借用したと判定され E0499
+// ❌ 借用分割で詰まる: &mut self メソッド同士の併用で構造体全体が借用扱いになり E0499
 impl Parser {
+    fn next_token(&mut self) -> &Token { self.lexer.next() }
+    fn apply(&mut self, tok: &Token) { self.state.update(tok); }
     fn step(&mut self) {
-        let tok = self.lexer.next();   // self 全体が可変借用扱い
-        self.state = transition(tok);  // ライフタイムエラー
+        let tok = self.next_token(); // self 全体が可変借用扱い
+        self.apply(tok);             // E0499: 2 回目の &mut self 借用が衝突
     }
 }
 
-// ✅ メモリの事情で free 関数に切り出す(必要なフィールドだけ個別借用)
+// ✅ メモリの事情で free 関数に切り出す（必要なフィールドだけ個別借用）
 fn advance(lexer: &mut Lexer, state: &mut State) {
-    let tok = lexer.next();   // lexer だけ可変借用
-    *state = transition(tok); // state だけ可変借用(disjoint なので OK)
+    let tok = lexer.next();  // lexer だけ可変借用
+    state.update(tok);       // state だけ可変借用（独立フィールドなので OK）
 }
 ```
 
-## まとめ・参考
+## まとめ
 
-- 一行まとめ: **基本は impl ベース(DDD 寄り)でよい。ただし借用・Deref・FFI などメモリ側の事情で free 関数が正当になる場面がある**ことを知っておく。
-- impl にまとめられるのに散らかしているならアンチパターン。借用分割等のために関数化しているなら正当。両者を見分ける。
-- 参考: Rust API Guidelines（C-METHOD, C-CTOR, C-CONV, C-SMART-PTR）、借用分割（Splitting Borrows）と E0499、`Box::into_raw`。
+- **基本は impl ベース（DDD 寄り）でよい。ただし借用・Deref・FFI などメモリ側の事情で free 関数が正当になる場面がある**。
+- impl にまとめられるのに散らかしているならアンチパターン、借用分割等のために関数化しているなら正当、と見分ける。
+
+## 参考
+
+- [Rust API Guidelines（C-METHOD, C-CTOR, C-CONV, C-SMART-PTR）](https://rust-lang.github.io/api-guidelines/checklist.html)
+- [The Rustonomicon - Splitting Borrows](https://doc.rust-lang.org/nomicon/borrow-splitting.html)
+- [std::boxed::Box::into_raw](https://doc.rust-lang.org/std/boxed/struct.Box.html#method.into_raw)
